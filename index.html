@@ -92,16 +92,16 @@
   /* Grid */
   .grid {
     flex: 1 0 auto;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
   }
   @media (max-width: 900px) {
-    .grid { flex-direction: column; }
+    .grid { grid-template-columns: 1fr; }
   }
   .day-col {
-    flex: 1 1 0;
     display: flex;
     flex-direction: column;
+    min-width: 0;
     padding: 24px 24px 24px 24px;
     border-right: 2px solid #000000;
   }
@@ -161,12 +161,23 @@
     font-size: 15px;
     font-family: inherit;
     color: var(--ink);
-    padding: 0 40px 0 16px;
+    padding: 0 40px 0 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .note-text-btn { cursor: pointer; }
+  .note-text-btn { cursor: pointer; display: flex; align-items: center; }
+  .note-chip {
+    display: inline-block;
+    max-width: 100%;
+    padding: 4px 12px;
+    border-radius: 8px;
+    color: #141414;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+  }
   .note-text-input { cursor: text; outline: none; }
   .note-cell.is-completed .note-text-btn,
   .note-cell.is-completed .note-text-input {
@@ -211,6 +222,128 @@
     font-style: normal;
     color: #646464;
     margin: 0;
+  }
+
+  /* Note popup */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    width: 552px;
+    max-width: 100%;
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-title {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: #000000;
+    margin: 0;
+  }
+  .modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .icon-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 0;
+    cursor: pointer;
+  }
+  .icon-btn svg { display: block; }
+  .modal-textarea {
+    width: 100%;
+    min-height: 150px;
+    border: 2px solid var(--box-border);
+    border-radius: 8px;
+    padding: 8px 16px 14px 12px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 18px;
+    letter-spacing: -0.4px;
+    line-height: 25px;
+    color: #000000;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    display: block;
+  }
+  .modal-textarea:focus { border-color: var(--box-border-hover); }
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+  }
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #FFFFFF;
+    border: 2px solid #EFEFEF;
+    border-radius: 7px;
+    height: 38px;
+    padding: 0 14px;
+    box-sizing: border-box;
+  }
+  .tag-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .tag-dot.selected {
+    box-shadow: 0 0 0 3px #E1E1E1;
+  }
+  .modal-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-footer-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 0;
+    cursor: pointer;
+  }
+  .modal-footer-actions button svg { display: block; }
+  .text-btn {
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 7px;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 38px !important;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .delete-btn {
+    background: #FFFFFF;
+    border: 2px solid #F5D1D1;
+    color: #DC2727;
   }
 </style>
 </head>
@@ -257,8 +390,54 @@
   <p>By the end of this process, we'll all be one step closer to the best version of ourselves.</p>
 </div>
 
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-header-actions">
+        <button class="icon-btn" id="modalCloseBtn" aria-label="Close">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="32" height="32" rx="16" fill="white"/>
+            <rect x="1" y="1" width="32" height="32" rx="16" stroke="black" stroke-width="2"/>
+            <path d="M9.5 17C9.5 17.9849 9.69399 18.9602 10.0709 19.8701C10.4478 20.7801 11.0003 21.6069 11.6967 22.3033C12.3931 22.9997 13.2199 23.5522 14.1299 23.9291C15.0398 24.306 16.0151 24.5 17 24.5C17.9849 24.5 18.9602 24.306 19.8701 23.9291C20.7801 23.5522 21.6069 22.9997 22.3033 22.3033C22.9997 21.6069 23.5522 20.7801 23.9291 19.8701C24.306 18.9602 24.5 17.9849 24.5 17C24.5 16.0151 24.306 15.0398 23.9291 14.1299C23.5522 13.2199 22.9997 12.3931 22.3033 11.6967C21.6069 11.0003 20.7801 10.4478 19.8701 10.0709C18.9602 9.69399 17.9849 9.5 17 9.5C16.0151 9.5 15.0398 9.69399 14.1299 10.0709C13.2199 10.4478 12.3931 11.0003 11.6967 11.6967C11.0003 12.3931 10.4478 13.2199 10.0709 14.1299C9.69399 15.0398 9.5 16.0151 9.5 17Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14L20 20M20 14L14 20" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <textarea class="modal-textarea" id="modalTextarea"></textarea>
+
+    <div class="modal-footer">
+      <div class="tag-pill" id="tagPill">
+        <button class="tag-dot" data-color="#21FFA1" style="background:#21FFA1" aria-label="Tag color 1"></button>
+        <button class="tag-dot" data-color="#FDF05E" style="background:#FDF05E" aria-label="Tag color 2"></button>
+        <button class="tag-dot" data-color="#6BCDF4" style="background:#6BCDF4" aria-label="Tag color 3"></button>
+        <button class="tag-dot" data-color="#FF8EF6" style="background:#FF8EF6" aria-label="Tag color 4"></button>
+        <button class="tag-dot" data-color="#ABB6FF" style="background:#ABB6FF" aria-label="Tag color 5"></button>
+      </div>
+      <div class="modal-footer-actions">
+        <button id="modalDeleteBtn" aria-label="Delete">
+          <svg width="102" height="38" viewBox="0 0 102 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="100" height="36" rx="7" fill="white"/>
+            <rect x="1" y="1" width="100" height="36" rx="7" stroke="#F5D1D1" stroke-width="2"/>
+            <path d="M33.9639 24H30.3545V13.8182H33.9937C35.0178 13.8182 35.8995 14.022 36.6386 14.4297C37.3777 14.834 37.9461 15.4157 38.3438 16.1747C38.7449 16.9337 38.9454 17.8419 38.9454 18.8991C38.9454 19.9598 38.7449 20.8712 38.3438 21.6335C37.9461 22.3958 37.3744 22.9808 36.6286 23.3885C35.8862 23.7962 34.9979 24 33.9639 24ZM32.5072 22.1555H33.8744C34.5107 22.1555 35.046 22.0429 35.4802 21.8175C35.9177 21.5888 36.2458 21.2358 36.4646 20.7585C36.6866 20.2779 36.7977 19.6581 36.7977 18.8991C36.7977 18.1468 36.6866 17.532 36.4646 17.0547C36.2458 16.5774 35.9193 16.2261 35.4852 16.0007C35.051 15.7753 34.5157 15.6626 33.8793 15.6626H32.5072V22.1555ZM43.7004 24.1491C42.9149 24.1491 42.2387 23.9901 41.672 23.6719C41.1085 23.3504 40.6743 22.8963 40.3694 22.3097C40.0645 21.7197 39.912 21.022 39.912 20.2166C39.912 19.4311 40.0645 18.7417 40.3694 18.1484C40.6743 17.5552 41.1035 17.0928 41.657 16.7614C42.2139 16.4299 42.8668 16.2642 43.6158 16.2642C44.1196 16.2642 44.5886 16.3454 45.0228 16.5078C45.4603 16.6669 45.8415 16.9072 46.1663 17.2287C46.4944 17.5502 46.7496 17.9545 46.9319 18.4418C47.1142 18.9257 47.2053 19.4924 47.2053 20.142V20.7237H40.7572V19.4112H45.2117C45.2117 19.1063 45.1454 18.8362 45.0129 18.6009C44.8803 18.3655 44.6963 18.1816 44.461 18.049C44.229 17.9131 43.9589 17.8452 43.6506 17.8452C43.3292 17.8452 43.0441 17.9197 42.7955 18.0689C42.5503 18.2147 42.358 18.4119 42.2188 18.6605C42.0796 18.9058 42.0084 19.1792 42.0051 19.4808V20.7287C42.0051 21.1065 42.0747 21.433 42.2139 21.7081C42.3564 21.9832 42.5569 22.1953 42.8154 22.3445C43.0739 22.4936 43.3805 22.5682 43.7352 22.5682C43.9705 22.5682 44.1859 22.535 44.3815 22.4688C44.577 22.4025 44.7444 22.303 44.8836 22.1705C45.0228 22.0379 45.1289 21.8755 45.2018 21.6832L47.1606 21.8125C47.0612 22.2831 46.8573 22.6941 46.5491 23.0455C46.2442 23.3935 45.8497 23.6652 45.3658 23.8608C44.8853 24.053 44.3301 24.1491 43.7004 24.1491ZM50.4253 13.8182V24H48.3074V13.8182H50.4253ZM55.322 24.1491C54.5365 24.1491 53.8604 23.9901 53.2936 23.6719C52.7301 23.3504 52.296 22.8963 51.991 22.3097C51.6861 21.7197 51.5337 21.022 51.5337 20.2166C51.5337 19.4311 51.6861 18.7417 51.991 18.1484C52.296 17.5552 52.7252 17.0928 53.2787 16.7614C53.8355 16.4299 54.4884 16.2642 55.2375 16.2642C55.7413 16.2642 56.2103 16.3454 56.6444 16.5078C57.0819 16.6669 57.4631 16.9072 57.7879 17.2287C58.116 17.5502 58.3712 17.9545 58.5535 18.4418C58.7358 18.9257 58.827 19.4924 58.827 20.142V20.7237H52.3788V19.4112H56.8334C56.8334 19.1063 56.7671 18.8362 56.6345 18.6009C56.5019 18.3655 56.318 18.1816 56.0827 18.049C55.8506 17.9131 55.5805 17.8452 55.2723 17.8452C54.9508 17.8452 54.6658 17.9197 54.4172 18.0689C54.1719 18.2147 53.9797 18.4119 53.8405 18.6605C53.7013 18.9058 53.63 19.1792 53.6267 19.4808V20.7287C53.6267 21.1065 53.6963 21.433 53.8355 21.7081C53.978 21.9832 54.1785 22.1953 54.4371 22.3445C54.6956 22.4936 55.0022 22.5682 55.3568 22.5682C55.5921 22.5682 55.8076 22.535 56.0031 22.4688C56.1987 22.4025 56.366 22.303 56.5052 22.1705C56.6444 22.0379 56.7505 21.8755 56.8234 21.6832L58.7822 21.8125C58.6828 22.2831 58.479 22.6941 58.1707 23.0455C57.8658 23.3935 57.4714 23.6652 56.9875 23.8608C56.5069 24.053 55.9517 24.1491 55.322 24.1491ZM63.9909 16.3636V17.9545H59.3921V16.3636H63.9909ZM60.4362 14.5341H62.5541V21.6534C62.5541 21.849 62.5839 22.0014 62.6436 22.1108C62.7032 22.2169 62.7861 22.2914 62.8921 22.3345C63.0015 22.3776 63.1275 22.3991 63.27 22.3991C63.3694 22.3991 63.4689 22.3909 63.5683 22.3743C63.6677 22.3544 63.7439 22.3395 63.797 22.3295L64.1301 23.9055C64.024 23.9387 63.8749 23.9768 63.6826 24.0199C63.4904 24.0663 63.2567 24.0945 62.9816 24.1044C62.4712 24.1243 62.0238 24.0563 61.6393 23.9006C61.2582 23.7448 60.9615 23.5028 60.7494 23.1747C60.5373 22.8466 60.4329 22.4323 60.4362 21.9318V14.5341ZM68.4886 24.1491C67.7031 24.1491 67.0269 23.9901 66.4602 23.6719C65.8967 23.3504 65.4625 22.8963 65.1576 22.3097C64.8527 21.7197 64.7002 21.022 64.7002 20.2166C64.7002 19.4311 64.8527 18.7417 65.1576 18.1484C65.4625 17.5552 65.8917 17.0928 66.4452 16.7614C67.0021 16.4299 67.655 16.2642 68.404 16.2642C68.9078 16.2642 69.3768 16.3454 69.811 16.5078C70.2485 16.6669 70.6297 16.9072 70.9545 17.2287C71.2826 17.5502 71.5378 17.9545 71.7201 18.4418C71.9024 18.9257 71.9935 19.4924 71.9935 20.142V20.7237H65.5454V19.4112H69.9999C69.9999 19.1063 69.9336 18.8362 69.8011 18.6009C69.6685 18.3655 69.4845 18.1816 69.2492 18.049C69.0172 17.9131 68.7471 17.8452 68.4388 17.8452C68.1174 17.8452 67.8323 17.9197 67.5837 18.0689C67.3385 18.2147 67.1462 18.4119 67.007 18.6605C66.8678 18.9058 66.7966 19.1792 66.7933 19.4808V20.7287C66.7933 21.1065 66.8629 21.433 67.0021 21.7081C67.1446 21.9832 67.3451 22.1953 67.6036 22.3445C67.8621 22.4936 68.1687 22.5682 68.5234 22.5682C68.7587 22.5682 68.9741 22.535 69.1697 22.4688C69.3652 22.4025 69.5326 22.303 69.6718 22.1705C69.811 22.0379 69.9171 21.8755 69.99 21.6832L71.9488 21.8125C71.8494 22.2831 71.6455 22.6941 71.3373 23.0455C71.0324 23.3935 70.6379 23.6652 70.154 23.8608C69.6735 24.053 69.1183 24.1491 68.4886 24.1491Z" fill="#DC2727"/>
+          </svg>
+        </button>
+        <button id="modalSaveBtn" aria-label="Save">
+          <svg width="98" height="38" viewBox="0 0 98 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="98" height="38" rx="8" fill="black"/>
+            <path d="M39.1555 16.7464C39.1158 16.3454 38.9451 16.0339 38.6435 15.8118C38.3418 15.5897 37.9325 15.4787 37.4155 15.4787C37.0641 15.4787 36.7675 15.5284 36.5256 15.6278C36.2836 15.724 36.098 15.8582 35.9687 16.0305C35.8428 16.2029 35.7798 16.3984 35.7798 16.6172C35.7732 16.7995 35.8113 16.9586 35.8942 17.0945C35.9803 17.2304 36.098 17.348 36.2471 17.4474C36.3963 17.5436 36.5686 17.6281 36.7642 17.701C36.9597 17.7706 37.1686 17.8303 37.3906 17.88L38.3054 18.0987C38.7495 18.1982 39.1572 18.3307 39.5284 18.4964C39.8996 18.6622 40.2211 18.866 40.4929 19.108C40.7647 19.3499 40.9751 19.6349 41.1243 19.9631C41.2767 20.2912 41.3546 20.6674 41.3579 21.0916C41.3546 21.7147 41.1955 22.255 40.8807 22.7124C40.5691 23.1664 40.1184 23.5194 39.5284 23.7713C38.9418 24.0199 38.2341 24.1442 37.4055 24.1442C36.5836 24.1442 35.8677 24.0182 35.2578 23.7663C34.6513 23.5144 34.1773 23.1416 33.8359 22.6477C33.4979 22.1506 33.3205 21.5357 33.304 20.8033H35.3871C35.4103 21.1446 35.508 21.4297 35.6804 21.6584C35.8561 21.8838 36.0897 22.0545 36.3814 22.1705C36.6764 22.2831 37.0095 22.3395 37.3807 22.3395C37.7453 22.3395 38.0618 22.2865 38.3302 22.1804C38.602 22.0743 38.8125 21.9268 38.9616 21.7379C39.1108 21.549 39.1854 21.3319 39.1854 21.0866C39.1854 20.858 39.1174 20.6657 38.9815 20.5099C38.8489 20.3542 38.6534 20.2216 38.3949 20.1122C38.1397 20.0028 37.8265 19.9034 37.4552 19.8139L36.3466 19.5355C35.4882 19.3267 34.8104 19.0002 34.3132 18.5561C33.816 18.112 33.5691 17.5137 33.5724 16.7614C33.5691 16.1449 33.7332 15.6063 34.0646 15.1456C34.3994 14.6849 34.8584 14.3253 35.4418 14.0668C36.0251 13.8082 36.688 13.679 37.4304 13.679C38.1861 13.679 38.8456 13.8082 39.4091 14.0668C39.9758 14.3253 40.4167 14.6849 40.7315 15.1456C41.0464 15.6063 41.2088 16.1399 41.2187 16.7464H39.1555ZM44.6637 24.1442C44.1765 24.1442 43.7423 24.0597 43.3611 23.8906C42.98 23.7183 42.6784 23.4647 42.4563 23.13C42.2376 22.7919 42.1282 22.371 42.1282 21.8672C42.1282 21.4429 42.2061 21.0866 42.3619 20.7983C42.5176 20.5099 42.7298 20.2779 42.9982 20.1023C43.2667 19.9266 43.5716 19.794 43.913 19.7045C44.2577 19.6151 44.619 19.5521 44.9968 19.5156C45.4409 19.4692 45.7989 19.4261 46.0707 19.3864C46.3424 19.3433 46.5397 19.2803 46.6623 19.1974C46.7849 19.1146 46.8462 18.992 46.8462 18.8295V18.7997C46.8462 18.4848 46.7468 18.2412 46.5479 18.0689C46.3524 17.8965 46.074 17.8104 45.7127 17.8104C45.3316 17.8104 45.0283 17.8949 44.8029 18.0639C44.5775 18.2296 44.4284 18.4384 44.3555 18.6903L42.3967 18.5312C42.4961 18.0672 42.6916 17.6662 42.9833 17.3281C43.275 16.9867 43.6512 16.7249 44.1119 16.5426C44.5759 16.357 45.1128 16.2642 45.7227 16.2642C46.1469 16.2642 46.5529 16.3139 46.9407 16.4134C47.3318 16.5128 47.6781 16.6669 47.9798 16.8757C48.2847 17.0845 48.525 17.353 48.7006 17.6811C48.8763 18.0059 48.9641 18.3954 48.9641 18.8494V24H46.9556V22.9411H46.8959C46.7733 23.1797 46.6093 23.3902 46.4038 23.5724C46.1983 23.7514 45.9513 23.8923 45.663 23.995C45.3746 24.0945 45.0415 24.1442 44.6637 24.1442ZM45.2702 22.6825C45.5818 22.6825 45.8569 22.6212 46.0955 22.4986C46.3342 22.3726 46.5214 22.2036 46.6573 21.9915C46.7932 21.7794 46.8611 21.5391 46.8611 21.2706V20.4602C46.7949 20.5033 46.7037 20.5431 46.5877 20.5795C46.475 20.6127 46.3474 20.6442 46.2049 20.674C46.0624 20.7005 45.9199 20.7254 45.7773 20.7486C45.6348 20.7685 45.5056 20.7867 45.3896 20.8033C45.141 20.8397 44.9239 20.8977 44.7383 20.9773C44.5527 21.0568 44.4085 21.1645 44.3057 21.3004C44.203 21.433 44.1516 21.5987 44.1516 21.7976C44.1516 22.0859 44.256 22.3063 44.4648 22.4588C44.677 22.608 44.9454 22.6825 45.2702 22.6825ZM57.1731 16.3636L54.5034 24H52.117L49.4473 16.3636H51.6845L53.2704 21.8274H53.35L54.9309 16.3636H57.1731ZM61.211 24.1491C60.4254 24.1491 59.7493 23.9901 59.1825 23.6719C58.6191 23.3504 58.1849 22.8963 57.88 22.3097C57.5751 21.7197 57.4226 21.022 57.4226 20.2166C57.4226 19.4311 57.5751 18.7417 57.88 18.1484C58.1849 17.5552 58.6141 17.0928 59.1676 16.7614C59.7244 16.4299 60.3774 16.2642 61.1264 16.2642C61.6302 16.2642 62.0992 16.3454 62.5334 16.5078C62.9709 16.6669 63.352 16.9072 63.6769 17.2287C64.005 17.5502 64.2602 17.9545 64.4425 18.4418C64.6248 18.9257 64.7159 19.4924 64.7159 20.142V20.7237H58.2678V19.4112H62.7223C62.7223 19.1063 62.656 18.8362 62.5235 18.6009C62.3909 18.3655 62.2069 18.1816 61.9716 18.049C61.7396 17.9131 61.4695 17.8452 61.1612 17.8452C60.8397 17.8452 60.5547 17.9197 60.3061 18.0689C60.0609 18.2147 59.8686 18.4119 59.7294 18.6605C59.5902 18.9058 59.519 19.1792 59.5156 19.4808V20.7287C59.5156 21.1065 59.5852 21.433 59.7244 21.7081C59.867 21.9832 60.0675 22.1953 60.326 22.3445C60.5845 22.4936 60.8911 22.5682 61.2458 22.5682C61.4811 22.5682 61.6965 22.535 61.8921 22.4688C62.0876 22.4025 62.255 22.303 62.3942 22.1705C62.5334 22.0379 62.6395 21.8755 62.7124 21.6832L64.6712 21.8125C64.5717 22.2831 64.3679 22.6941 64.0597 23.0455C63.7547 23.3935 63.3603 23.6652 62.8764 23.8608C62.3958 24.053 61.8407 24.1491 61.211 24.1491Z" fill="white"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const FULL_DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const ROW_HEIGHT = 42;
@@ -322,6 +501,16 @@
   }
 
   function enterEdit(wrapper, dk, index) {
+    maybeGrowAll(dk, index);
+    const item = notesData[dk][index];
+    if (item.text.trim().length === 0) {
+      startInlineEdit(wrapper, dk, index);
+    } else {
+      openModal(dk, index);
+    }
+  }
+
+  function startInlineEdit(wrapper, dk, index) {
     const current = wrapper.querySelector(".note-text-btn, .note-text-input");
     if (!current || current.tagName === "INPUT") return;
 
@@ -340,18 +529,109 @@
     current.replaceWith(input);
     input.focus();
     input.select();
+  }
 
-    maybeGrowAll(dk, index);
+  function renderButtonContent(btn, dk, index) {
+    const item = notesData[dk][index];
+    btn.innerHTML = "";
+    if (item.color && item.text) {
+      btn.classList.add("has-chip");
+      const chip = document.createElement("span");
+      chip.className = "note-chip";
+      chip.style.background = item.color;
+      chip.textContent = item.text;
+      btn.appendChild(chip);
+    } else {
+      btn.classList.remove("has-chip");
+      btn.textContent = item.text;
+    }
   }
 
   function buildTextButton(wrapper, dk, index) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "note-text-btn";
-    btn.textContent = notesData[dk][index].text;
+    renderButtonContent(btn, dk, index);
     btn.addEventListener("click", () => enterEdit(wrapper, dk, index));
     return btn;
   }
+
+  // ---- Note popup ----
+  let modalTarget = null; // { dk, index }
+  let modalSelectedColor = null;
+
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalTextarea = document.getElementById("modalTextarea");
+  const tagPill = document.getElementById("tagPill");
+
+  function refreshCellByTarget(dk, index) {
+    const col = document.querySelector(`.day-col[data-dk="${dk}"]`);
+    if (!col) return;
+    const notesCol = col.querySelector(".notes-col");
+    const cell = notesCol.children[index];
+    if (!cell) return;
+    const textEl = cell.querySelector(".note-text-btn");
+    if (textEl) renderButtonContent(textEl, dk, index);
+    updateCellState(cell, dk, index);
+  }
+
+  function openModal(dk, index) {
+    modalTarget = { dk, index };
+    const item = notesData[dk][index];
+    const [y, m, d] = dk.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    const dayIdx = getWorkweek(weekOffset).findIndex((dt) => keyOf(dt) === dk);
+    const dayName = dayIdx >= 0 ? FULL_DAY_NAMES[dayIdx] : "";
+    modalTitle.textContent = `${dayName}, ${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+    modalTextarea.value = item.text;
+    modalSelectedColor = item.color || null;
+    updateTagSelection();
+    modalOverlay.classList.add("open");
+    setTimeout(() => modalTextarea.focus(), 0);
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove("open");
+    modalTarget = null;
+  }
+
+  function updateTagSelection() {
+    tagPill.querySelectorAll(".tag-dot").forEach((dot) => {
+      dot.classList.toggle("selected", dot.dataset.color === modalSelectedColor);
+    });
+  }
+
+  tagPill.querySelectorAll(".tag-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      modalSelectedColor = modalSelectedColor === dot.dataset.color ? null : dot.dataset.color;
+      updateTagSelection();
+    });
+  });
+
+  document.getElementById("modalSaveBtn").addEventListener("click", () => {
+    if (!modalTarget) return;
+    const { dk, index } = modalTarget;
+    notesData[dk][index].text = modalTextarea.value;
+    notesData[dk][index].color = modalSelectedColor;
+    refreshCellByTarget(dk, index);
+    closeModal();
+  });
+
+  document.getElementById("modalDeleteBtn").addEventListener("click", () => {
+    if (!modalTarget) return;
+    const { dk, index } = modalTarget;
+    notesData[dk][index].text = "";
+    notesData[dk][index].completed = false;
+    notesData[dk][index].color = null;
+    refreshCellByTarget(dk, index);
+    closeModal();
+  });
+
+  document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
 
   function buildCell(dk, index) {
     const wrapper = document.createElement("div");
