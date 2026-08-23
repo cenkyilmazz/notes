@@ -88,6 +88,7 @@
     cursor: pointer;
   }
   .nav-btn svg { display: block; }
+  .nav-btn:hover circle { fill: #363636; }
 
   /* Grid */
   .grid {
@@ -161,11 +162,12 @@
     font-size: 15px;
     font-family: inherit;
     color: var(--ink);
-    padding: 0 40px 0 6px;
+    padding: 0 40px 0 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .note-text-btn.has-chip { padding-left: 6px; }
   .note-text-btn { cursor: pointer; display: flex; align-items: center; }
   .note-chip {
     display: inline-block;
@@ -222,6 +224,20 @@
     font-style: normal;
     color: #646464;
     margin: 0;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .day-col-enter {
+    animation: fadeSlideUp 0.4s ease both;
+  }
+  .note-cell-enter {
+    animation: fadeSlideUp 0.35s ease both;
+  }
+  .header-enter {
+    animation: fadeSlideUp 0.4s ease both;
   }
 
   /* Note popup */
@@ -376,7 +392,7 @@
 </head>
 <body>
 
-<div class="header">
+<div class="header header-enter">
   <div class="header-left">
     <h1 class="month-title" id="monthTitle"></h1>
     <button class="today-btn" id="todayBtn" aria-label="Today">
@@ -486,6 +502,27 @@
   let weekOffset = 0;
   // notesData[dk] = [{ text: "", completed: false }, ...]
   const notesData = {};
+  const STORAGE_KEY = "hafta-notlari-data-v1";
+
+  function saveToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notesData));
+    } catch (e) {
+      console.error("Storage save failed", e);
+    }
+  }
+
+  function loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        Object.keys(parsed).forEach((dk) => { notesData[dk] = parsed[dk]; });
+      }
+    } catch (e) {
+      console.error("Storage load failed", e);
+    }
+  }
   let dragSource = null; // { dk, index }
 
   function pad(n) { return String(n).padStart(2, "0"); }
@@ -563,6 +600,7 @@
       const btn = buildTextButton(wrapper, dk, index);
       input.replaceWith(btn);
       updateCellState(wrapper, dk, index);
+      saveToStorage();
     });
     current.replaceWith(input);
     input.focus();
@@ -674,6 +712,7 @@
     notesData[dk][index].color = modalSelectedColor;
     refreshCellByTarget(dk, index);
     closeModal();
+    saveToStorage();
   });
 
   document.getElementById("modalDeleteBtn").addEventListener("click", () => {
@@ -684,6 +723,7 @@
     notesData[dk][index].color = null;
     refreshCellByTarget(dk, index);
     closeModal();
+    saveToStorage();
   });
 
   document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
@@ -691,9 +731,10 @@
     if (e.target === modalOverlay) closeModal();
   });
 
-  function buildCell(dk, index) {
+  function buildCell(dk, index, delayMs) {
     const wrapper = document.createElement("div");
-    wrapper.className = "note-cell";
+    wrapper.className = "note-cell note-cell-enter";
+    wrapper.style.animationDelay = `${delayMs || 0}ms`;
     wrapper.draggable = true;
 
     wrapper.appendChild(buildTextButton(wrapper, dk, index));
@@ -707,6 +748,7 @@
       e.stopPropagation();
       notesData[dk][index].completed = !notesData[dk][index].completed;
       updateCellState(wrapper, dk, index);
+      saveToStorage();
     });
     wrapper.appendChild(tick);
 
@@ -759,6 +801,7 @@
       if (src.dk === dk && src.index === index) return;
       moveNote(src.dk, src.index, dk, index);
       render();
+      saveToStorage();
     });
 
     updateCellState(wrapper, dk, index);
@@ -794,6 +837,7 @@
     arr.push({ text: "", completed: false });
     const notesCol = col.querySelector(".notes-col");
     notesCol.appendChild(buildCell(dk, nextIndex));
+    saveToStorage();
   }
 
   function render() {
@@ -810,7 +854,8 @@
       const dk = dks[i];
 
       const col = document.createElement("div");
-      col.className = "day-col";
+      col.className = "day-col day-col-enter";
+      col.style.animationDelay = `${i * 60}ms`;
       col.dataset.dk = dk;
 
       const head = document.createElement("div");
@@ -824,7 +869,8 @@
       const notesCol = document.createElement("div");
       notesCol.className = "notes-col";
       notesData[dk].forEach((_, index) => {
-        notesCol.appendChild(buildCell(dk, index));
+        const delay = i * 60 + Math.min(index * 25, 300);
+        notesCol.appendChild(buildCell(dk, index, delay));
       });
       col.appendChild(notesCol);
 
@@ -836,6 +882,7 @@
   document.getElementById("nextBtn").addEventListener("click", () => { weekOffset += 1; render(); });
   document.getElementById("todayBtn").addEventListener("click", () => { weekOffset = 0; render(); });
 
+  loadFromStorage();
   render();
 </script>
 
