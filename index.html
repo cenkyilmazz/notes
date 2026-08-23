@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Week Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #141414;
+    --box-border: #EFEFEF;
+    --box-border-hover: #B1B0B0;
+    --divider: #DADAD6;
+    --muted: #9C9C97;
+    --header-bg: #FFFFFF;
+    --header-stroke: #E3E3E3;
+    --day-name-color: #C4C4C4;
+  }
+  html, body {
+    height: 100%;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    flex: 0 0 100px;
+    height: 100px;
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--header-stroke);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .month-title {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.5px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .today-btn {
+    position: relative;
+    width: 70px;
+    height: 24px;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 0;
+    cursor: pointer;
+  }
+  .today-btn svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+  }
+  .today-btn .hover-svg { opacity: 0; }
+  .today-btn:hover .default-svg { opacity: 0; }
+  .today-btn:hover .hover-svg { opacity: 1; }
+  .nav-buttons {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 0;
+    cursor: pointer;
+  }
+  .nav-btn svg { display: block; }
+
+  /* Grid */
+  .grid {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: row;
+  }
+  @media (max-width: 900px) {
+    .grid { flex-direction: column; }
+  }
+  .day-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 24px 24px 24px;
+    border-right: 2px solid #000000;
+  }
+  .day-col:last-child { border-right: none; }
+  .day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #000000;
+  }
+  .day-date {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: #000000;
+  }
+  .day-name {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: var(--day-name-color);
+  }
+  .notes-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Note cell */
+  .note-cell {
+    position: relative;
+    width: 100%;
+    height: 42px;
+    flex: 0 0 42px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 2px solid var(--box-border);
+    background: #FFFFFF;
+    display: flex;
+    align-items: stretch;
+  }
+  .note-cell:hover {
+    border-color: var(--box-border-hover);
+  }
+  .note-text-btn,
+  .note-text-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--ink);
+    padding: 0 40px 0 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .note-text-btn { cursor: pointer; }
+  .note-text-input { cursor: text; outline: none; }
+  .note-cell.is-completed .note-text-btn,
+  .note-cell.is-completed .note-text-input {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  .tick-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .note-cell.has-text:hover .tick-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .note-cell.dragging {
+    opacity: 0.4;
+  }
+  .note-cell.drag-target {
+    border-color: #000000;
+  }
+  .tick-btn svg { display: block; }
+
+  .footer {
+    text-align: center;
+    padding: 16px 24px;
+  }
+  .footer p {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    font-style: normal;
+    color: #646464;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1 class="month-title" id="monthTitle"></h1>
+    <button class="today-btn" id="todayBtn" aria-label="Today">
+      <svg class="default-svg" width="70" height="24" viewBox="0 0 70 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="68" height="22" rx="7" stroke="black" stroke-width="2"/>
+        <path d="M17.9999 8.79403V7.27273H25.1675V8.79403H22.4956V16H20.6718V8.79403H17.9999ZM28.082 16.1278C27.42 16.1278 26.8476 15.9872 26.3646 15.706C25.8845 15.4219 25.5138 15.027 25.2524 14.5213C24.9911 14.0128 24.8604 13.4233 24.8604 12.7528C24.8604 12.0767 24.9911 11.4858 25.2524 10.9801C25.5138 10.4716 25.8845 10.0767 26.3646 9.79545C26.8476 9.51136 27.42 9.36932 28.082 9.36932C28.7439 9.36932 29.3149 9.51136 29.795 9.79545C30.278 10.0767 30.6502 10.4716 30.9115 10.9801C31.1729 11.4858 31.3036 12.0767 31.3036 12.7528C31.3036 13.4233 31.1729 14.0128 30.9115 14.5213C30.6502 15.027 30.278 15.4219 29.795 15.706C29.3149 15.9872 28.7439 16.1278 28.082 16.1278ZM28.0905 14.7216C28.3916 14.7216 28.6431 14.6364 28.8448 14.4659C29.0465 14.2926 29.1985 14.0568 29.3007 13.7585C29.4058 13.4602 29.4584 13.1207 29.4584 12.7401C29.4584 12.3594 29.4058 12.0199 29.3007 11.7216C29.1985 11.4233 29.0465 11.1875 28.8448 11.0142C28.6431 10.8409 28.3916 10.7543 28.0905 10.7543C27.7865 10.7543 27.5308 10.8409 27.3235 11.0142C27.1189 11.1875 26.9641 11.4233 26.859 11.7216C26.7567 12.0199 26.7056 12.3594 26.7056 12.7401C26.7056 13.1207 26.7567 13.4602 26.859 13.7585C26.9641 14.0568 27.1189 14.2926 27.3235 14.4659C27.5308 14.6364 27.7865 14.7216 28.0905 14.7216ZM34.6559 16.1065C34.1587 16.1065 33.7085 15.9787 33.305 15.723C32.9045 15.4645 32.5863 15.0852 32.3505 14.5852C32.1175 14.0824 32.0011 13.4659 32.0011 12.7358C32.0011 11.9858 32.1218 11.3622 32.3633 10.8651C32.6048 10.3651 32.9258 9.99148 33.3263 9.74432C33.7298 9.49432 34.1715 9.36932 34.6516 9.36932C35.0181 9.36932 35.3235 9.43182 35.5678 9.55682C35.815 9.67898 36.0138 9.83239 36.1644 10.017C36.3178 10.1989 36.4343 10.3778 36.5138 10.554H36.5692V7.27273H38.3803V16H36.5906V14.9517H36.5138C36.4286 15.1335 36.3079 15.3139 36.1516 15.4929C35.9982 15.669 35.7979 15.8153 35.5508 15.9318C35.3065 16.0483 35.0082 16.1065 34.6559 16.1065ZM35.2312 14.6619C35.5238 14.6619 35.771 14.5824 35.9727 14.4233C36.1772 14.2614 36.3335 14.0355 36.4414 13.7457C36.5522 13.456 36.6076 13.1165 36.6076 12.7273C36.6076 12.3381 36.5536 12 36.4457 11.7131C36.3377 11.4261 36.1815 11.2045 35.9769 11.0483C35.7724 10.892 35.5238 10.8139 35.2312 10.8139C34.9329 10.8139 34.6815 10.8949 34.4769 11.0568C34.2724 11.2187 34.1175 11.4432 34.0124 11.7301C33.9073 12.017 33.8548 12.3494 33.8548 12.7273C33.8548 13.108 33.9073 13.4446 34.0124 13.7372C34.1204 14.027 34.2752 14.2543 34.4769 14.419C34.6815 14.581 34.9329 14.6619 35.2312 14.6619ZM41.4993 16.1236C41.0817 16.1236 40.7096 16.0511 40.3829 15.9062C40.0562 15.7585 39.7976 15.5412 39.6073 15.2543C39.4198 14.9645 39.3261 14.6037 39.3261 14.1719C39.3261 13.8082 39.3928 13.5028 39.5263 13.2557C39.6599 13.0085 39.8417 12.8097 40.0718 12.6591C40.3019 12.5085 40.5633 12.3949 40.8559 12.3182C41.1513 12.2415 41.461 12.1875 41.7849 12.1562C42.1655 12.1165 42.4724 12.0795 42.7053 12.0455C42.9383 12.0085 43.1073 11.9545 43.2124 11.8835C43.3175 11.8125 43.3701 11.7074 43.3701 11.5682V11.5426C43.3701 11.2727 43.2849 11.0639 43.1144 10.9162C42.9468 10.7685 42.7082 10.6946 42.3985 10.6946C42.0718 10.6946 41.8118 10.767 41.6187 10.9119C41.4255 11.054 41.2976 11.233 41.2351 11.4489L39.5562 11.3125C39.6414 10.9148 39.809 10.571 40.059 10.2812C40.309 9.98864 40.6314 9.7642 41.0263 9.60795C41.4241 9.44886 41.8843 9.36932 42.407 9.36932C42.7707 9.36932 43.1187 9.41193 43.4511 9.49716C43.7863 9.58239 44.0832 9.71449 44.3417 9.89347C44.603 10.0724 44.809 10.3026 44.9596 10.5838C45.1101 10.8622 45.1854 11.196 45.1854 11.5852V16H43.4638V15.0923H43.4127C43.3076 15.2969 43.167 15.4773 42.9908 15.6335C42.8147 15.7869 42.603 15.9077 42.3559 15.9957C42.1087 16.081 41.8232 16.1236 41.4993 16.1236ZM42.0192 14.8707C42.2863 14.8707 42.5221 14.8182 42.7266 14.7131C42.9312 14.6051 43.0917 14.4602 43.2082 14.2784C43.3246 14.0966 43.3829 13.8906 43.3829 13.6605V12.9659C43.3261 13.0028 43.2479 13.0369 43.1485 13.0682C43.0519 13.0966 42.9425 13.1236 42.8204 13.1491C42.6982 13.1719 42.5761 13.1932 42.4539 13.2131C42.3317 13.2301 42.2209 13.2457 42.1215 13.2599C41.9084 13.2912 41.7224 13.3409 41.5633 13.4091C41.4042 13.4773 41.2806 13.5696 41.1925 13.6861C41.1045 13.7997 41.0604 13.9418 41.0604 14.1122C41.0604 14.3594 41.1499 14.5483 41.3289 14.679C41.5107 14.8068 41.7408 14.8707 42.0192 14.8707ZM47.2402 18.4545C47.0101 18.4545 46.7941 18.4361 46.5924 18.3991C46.3936 18.3651 46.2288 18.321 46.0981 18.267L46.5072 16.9119C46.7203 16.9773 46.912 17.0128 47.0825 17.0185C47.2558 17.0241 47.4049 16.9844 47.5299 16.8991C47.6578 16.8139 47.7615 16.669 47.841 16.4645L47.9476 16.1875L45.5995 9.45455H47.5086L48.8638 14.2614H48.9319L50.2998 9.45455H52.2217L49.6777 16.7074C49.5555 17.0597 49.3893 17.3665 49.1791 17.6278C48.9717 17.892 48.7089 18.0952 48.3907 18.2372C48.0726 18.3821 47.689 18.4545 47.2402 18.4545Z" fill="black"/>
+      </svg>
+      <svg class="hover-svg" width="70" height="24" viewBox="0 0 70 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="68" height="22" rx="7" fill="black"/>
+        <rect x="1" y="1" width="68" height="22" rx="7" stroke="black" stroke-width="2"/>
+        <path d="M17.9999 8.79403V7.27273H25.1675V8.79403H22.4956V16H20.6718V8.79403H17.9999ZM28.082 16.1278C27.42 16.1278 26.8476 15.9872 26.3646 15.706C25.8845 15.4219 25.5138 15.027 25.2524 14.5213C24.9911 14.0128 24.8604 13.4233 24.8604 12.7528C24.8604 12.0767 24.9911 11.4858 25.2524 10.9801C25.5138 10.4716 25.8845 10.0767 26.3646 9.79545C26.8476 9.51136 27.42 9.36932 28.082 9.36932C28.7439 9.36932 29.3149 9.51136 29.795 9.79545C30.278 10.0767 30.6502 10.4716 30.9115 10.9801C31.1729 11.4858 31.3036 12.0767 31.3036 12.7528C31.3036 13.4233 31.1729 14.0128 30.9115 14.5213C30.6502 15.027 30.278 15.4219 29.795 15.706C29.3149 15.9872 28.7439 16.1278 28.082 16.1278ZM28.0905 14.7216C28.3916 14.7216 28.6431 14.6364 28.8448 14.4659C29.0465 14.2926 29.1985 14.0568 29.3007 13.7585C29.4058 13.4602 29.4584 13.1207 29.4584 12.7401C29.4584 12.3594 29.4058 12.0199 29.3007 11.7216C29.1985 11.4233 29.0465 11.1875 28.8448 11.0142C28.6431 10.8409 28.3916 10.7543 28.0905 10.7543C27.7865 10.7543 27.5308 10.8409 27.3235 11.0142C27.1189 11.1875 26.9641 11.4233 26.859 11.7216C26.7567 12.0199 26.7056 12.3594 26.7056 12.7401C26.7056 13.1207 26.7567 13.4602 26.859 13.7585C26.9641 14.0568 27.1189 14.2926 27.3235 14.4659C27.5308 14.6364 27.7865 14.7216 28.0905 14.7216ZM34.6559 16.1065C34.1587 16.1065 33.7085 15.9787 33.305 15.723C32.9045 15.4645 32.5863 15.0852 32.3505 14.5852C32.1175 14.0824 32.0011 13.4659 32.0011 12.7358C32.0011 11.9858 32.1218 11.3622 32.3633 10.8651C32.6048 10.3651 32.9258 9.99148 33.3263 9.74432C33.7298 9.49432 34.1715 9.36932 34.6516 9.36932C35.0181 9.36932 35.3235 9.43182 35.5678 9.55682C35.815 9.67898 36.0138 9.83239 36.1644 10.017C36.3178 10.1989 36.4343 10.3778 36.5138 10.554H36.5692V7.27273H38.3803V16H36.5906V14.9517H36.5138C36.4286 15.1335 36.3079 15.3139 36.1516 15.4929C35.9982 15.669 35.7979 15.8153 35.5508 15.9318C35.3065 16.0483 35.0082 16.1065 34.6559 16.1065ZM35.2312 14.6619C35.5238 14.6619 35.771 14.5824 35.9727 14.4233C36.1772 14.2614 36.3335 14.0355 36.4414 13.7457C36.5522 13.456 36.6076 13.1165 36.6076 12.7273C36.6076 12.3381 36.5536 12 36.4457 11.7131C36.3377 11.4261 36.1815 11.2045 35.9769 11.0483C35.7724 10.892 35.5238 10.8139 35.2312 10.8139C34.9329 10.8139 34.6815 10.8949 34.4769 11.0568C34.2724 11.2187 34.1175 11.4432 34.0124 11.7301C33.9073 12.017 33.8548 12.3494 33.8548 12.7273C33.8548 13.108 33.9073 13.4446 34.0124 13.7372C34.1204 14.027 34.2752 14.2543 34.4769 14.419C34.6815 14.581 34.9329 14.6619 35.2312 14.6619ZM41.4993 16.1236C41.0817 16.1236 40.7096 16.0511 40.3829 15.9062C40.0562 15.7585 39.7976 15.5412 39.6073 15.2543C39.4198 14.9645 39.3261 14.6037 39.3261 14.1719C39.3261 13.8082 39.3928 13.5028 39.5263 13.2557C39.6599 13.0085 39.8417 12.8097 40.0718 12.6591C40.3019 12.5085 40.5633 12.3949 40.8559 12.3182C41.1513 12.2415 41.461 12.1875 41.7849 12.1562C42.1655 12.1165 42.4724 12.0795 42.7053 12.0455C42.9383 12.0085 43.1073 11.9545 43.2124 11.8835C43.3175 11.8125 43.3701 11.7074 43.3701 11.5682V11.5426C43.3701 11.2727 43.2849 11.0639 43.1144 10.9162C42.9468 10.7685 42.7082 10.6946 42.3985 10.6946C42.0718 10.6946 41.8118 10.767 41.6187 10.9119C41.4255 11.054 41.2976 11.233 41.2351 11.4489L39.5562 11.3125C39.6414 10.9148 39.809 10.571 40.059 10.2812C40.309 9.98864 40.6314 9.7642 41.0263 9.60795C41.4241 9.44886 41.8843 9.36932 42.407 9.36932C42.7707 9.36932 43.1187 9.41193 43.4511 9.49716C43.7863 9.58239 44.0832 9.71449 44.3417 9.89347C44.603 10.0724 44.809 10.3026 44.9596 10.5838C45.1101 10.8622 45.1854 11.196 45.1854 11.5852V16H43.4638V15.0923H43.4127C43.3076 15.2969 43.167 15.4773 42.9908 15.6335C42.8147 15.7869 42.603 15.9077 42.3559 15.9957C42.1087 16.081 41.8232 16.1236 41.4993 16.1236ZM42.0192 14.8707C42.2863 14.8707 42.5221 14.8182 42.7266 14.7131C42.9312 14.6051 43.0917 14.4602 43.2082 14.2784C43.3246 14.0966 43.3829 13.8906 43.3829 13.6605V12.9659C43.3261 13.0028 43.2479 13.0369 43.1485 13.0682C43.0519 13.0966 42.9425 13.1236 42.8204 13.1491C42.6982 13.1719 42.5761 13.1932 42.4539 13.2131C42.3317 13.2301 42.2209 13.2457 42.1215 13.2599C41.9084 13.2912 41.7224 13.3409 41.5633 13.4091C41.4042 13.4773 41.2806 13.5696 41.1925 13.6861C41.1045 13.7997 41.0604 13.9418 41.0604 14.1122C41.0604 14.3594 41.1499 14.5483 41.3289 14.679C41.5107 14.8068 41.7408 14.8707 42.0192 14.8707ZM47.2402 18.4545C47.0101 18.4545 46.7941 18.4361 46.5924 18.3991C46.3936 18.3651 46.2288 18.321 46.0981 18.267L46.5072 16.9119C46.7203 16.9773 46.912 17.0128 47.0825 17.0185C47.2558 17.0241 47.4049 16.9844 47.5299 16.8991C47.6578 16.8139 47.7615 16.669 47.841 16.4645L47.9476 16.1875L45.5995 9.45455H47.5086L48.8638 14.2614H48.9319L50.2998 9.45455H52.2217L49.6777 16.7074C49.5555 17.0597 49.3893 17.3665 49.1791 17.6278C48.9717 17.892 48.7089 18.0952 48.3907 18.2372C48.0726 18.3821 47.689 18.4545 47.2402 18.4545Z" fill="white"/>
+      </svg>
+    </button>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous week">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="22" transform="matrix(-1 0 0 1 44 0)" fill="black"/>
+        <path d="M14.0001 21.9999L22 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14.0002 22H30" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 29.9999L14.0001 22" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="nav-btn" id="nextBtn" aria-label="Next week">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="22" fill="black"/>
+        <path d="M29.9999 21.9999L22 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M29.9998 22H14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 29.9999L29.9999 22" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="grid" id="weekGrid"></div>
+
+<div class="footer">
+  <p>By the end of this process, we'll all be one step closer to the best version of ourselves.</p>
+</div>
+
+<script>
+  const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const ROW_HEIGHT = 42;
+  const ROW_GAP = 8;
+
+  const TICK_SVG = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 9.5L7.85714 12L12 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="9" cy="9" r="8" stroke="black" stroke-width="2"/>
+</svg>`;
+  const TICK_HOVER_SVG = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="9" cy="9" r="8" fill="black" stroke="black" stroke-width="2"/>
+<path d="M5.5 9.5L7.85714 12L12 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+  let weekOffset = 0;
+  // notesData[dk] = [{ text: "", completed: false }, ...]
+  const notesData = {};
+  let dragSource = null; // { dk, index }
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function keyOf(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+  function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    date.setDate(date.getDate() + diff);
+    date.setHours(0,0,0,0);
+    return date;
+  }
+
+  function getWorkweek(offset) {
+    const monday = getMonday(new Date());
+    monday.setDate(monday.getDate() + offset * 7);
+    return Array.from({length: 5}, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d;
+    });
+  }
+
+  function monthLabel(dates) {
+    const a = dates[0];
+    return `${MONTHS[a.getMonth()]} ${a.getFullYear()}`;
+  }
+
+  function ensureDay(dk) {
+    if (!notesData[dk]) {
+      notesData[dk] = Array.from({ length: 13 }, () => ({ text: "", completed: false }));
+    }
+    return notesData[dk];
+  }
+
+  function updateCellState(wrapper, dk, index) {
+    const item = notesData[dk][index];
+    const hasText = item.text.trim().length > 0;
+    wrapper.classList.toggle("has-text", hasText);
+    wrapper.classList.toggle("is-completed", !!item.completed);
+    const tick = wrapper.querySelector(".tick-btn");
+    if (tick) tick.innerHTML = item.completed ? TICK_HOVER_SVG : TICK_SVG;
+  }
+
+  function enterEdit(wrapper, dk, index) {
+    const current = wrapper.querySelector(".note-text-btn, .note-text-input");
+    if (!current || current.tagName === "INPUT") return;
+
+    const input = document.createElement("input");
+    input.className = "note-text-input";
+    input.value = notesData[dk][index].text;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === "Escape") input.blur();
+    });
+    input.addEventListener("blur", () => {
+      notesData[dk][index].text = input.value;
+      const btn = buildTextButton(wrapper, dk, index);
+      input.replaceWith(btn);
+      updateCellState(wrapper, dk, index);
+    });
+    current.replaceWith(input);
+    input.focus();
+    input.select();
+
+    maybeGrowAll(dk, index);
+  }
+
+  function buildTextButton(wrapper, dk, index) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-text-btn";
+    btn.textContent = notesData[dk][index].text;
+    btn.addEventListener("click", () => enterEdit(wrapper, dk, index));
+    return btn;
+  }
+
+  function buildCell(dk, index) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "note-cell";
+    wrapper.draggable = true;
+
+    wrapper.appendChild(buildTextButton(wrapper, dk, index));
+
+    const tick = document.createElement("button");
+    tick.type = "button";
+    tick.className = "tick-btn";
+    tick.setAttribute("aria-label", "Tamamlandı olarak işaretle");
+    tick.innerHTML = notesData[dk][index].completed ? TICK_HOVER_SVG : TICK_SVG;
+    tick.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notesData[dk][index].completed = !notesData[dk][index].completed;
+      updateCellState(wrapper, dk, index);
+    });
+    wrapper.appendChild(tick);
+
+    // Drag and drop
+    wrapper.addEventListener("dragstart", (e) => {
+      const child = wrapper.querySelector(".note-text-btn, .note-text-input");
+      if (child && child.tagName === "INPUT") { e.preventDefault(); return; }
+      dragSource = { dk, index };
+      wrapper.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", `${dk}::${index}`);
+
+      // Custom shadow-free drag preview matching our own note-cell design
+      const rect = wrapper.getBoundingClientRect();
+      const preview = wrapper.cloneNode(true);
+      preview.classList.remove("dragging");
+      preview.style.position = "fixed";
+      preview.style.top = "-1000px";
+      preview.style.left = "-1000px";
+      preview.style.margin = "0";
+      preview.style.width = rect.width + "px";
+      preview.style.height = rect.height + "px";
+      preview.style.boxShadow = "none";
+      preview.style.pointerEvents = "none";
+      document.body.appendChild(preview);
+      e.dataTransfer.setDragImage(preview, e.offsetX, e.offsetY);
+      setTimeout(() => preview.remove(), 0);
+    });
+    wrapper.addEventListener("dragend", () => {
+      wrapper.classList.remove("dragging");
+      dragSource = null;
+    });
+    wrapper.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    });
+    wrapper.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+      wrapper.classList.add("drag-target");
+    });
+    wrapper.addEventListener("dragleave", () => {
+      wrapper.classList.remove("drag-target");
+    });
+    wrapper.addEventListener("drop", (e) => {
+      e.preventDefault();
+      wrapper.classList.remove("drag-target");
+      if (!dragSource) return;
+      const src = dragSource;
+      dragSource = null;
+      if (src.dk === dk && src.index === index) return;
+      moveNote(src.dk, src.index, dk, index);
+      render();
+    });
+
+    updateCellState(wrapper, dk, index);
+    return wrapper;
+  }
+
+  function moveNote(srcDk, srcIndex, dstDk, dstIndex) {
+    const srcArr = ensureDay(srcDk);
+    const dstArr = ensureDay(dstDk);
+    const [item] = srcArr.splice(srcIndex, 1);
+    let insertAt = dstIndex;
+    if (srcArr === dstArr && srcIndex < dstIndex) insertAt -= 1;
+    dstArr.splice(insertAt, 0, item);
+    // keep the source day from running out of empty rows
+    if (srcArr.length === 0) srcArr.push({ text: "", completed: false });
+  }
+
+  function maybeGrowAll(dk, index) {
+    if (index === notesData[dk].length - 1) {
+      growAllDays();
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      });
+    }
+  }
+
+  function growAllDays() {
+    const grid = document.getElementById("weekGrid");
+    const cols = grid.querySelectorAll(".day-col");
+    cols.forEach((col) => {
+      const dk = col.dataset.dk;
+      const arr = ensureDay(dk);
+      const nextIndex = arr.length;
+      arr.push({ text: "", completed: false });
+      const notesCol = col.querySelector(".notes-col");
+      notesCol.appendChild(buildCell(dk, nextIndex));
+    });
+  }
+
+  function balanceWeek(dks) {
+    let maxLen = 0;
+    dks.forEach((dk) => { maxLen = Math.max(maxLen, notesData[dk].length); });
+    dks.forEach((dk) => {
+      while (notesData[dk].length < maxLen) {
+        notesData[dk].push({ text: "", completed: false });
+      }
+    });
+  }
+
+  function render() {
+    const dates = getWorkweek(weekOffset);
+    document.getElementById("monthTitle").textContent = monthLabel(dates);
+
+    const dks = dates.map(keyOf);
+    dks.forEach(ensureDay);
+    balanceWeek(dks);
+
+    const grid = document.getElementById("weekGrid");
+    grid.innerHTML = "";
+
+    dates.forEach((date, i) => {
+      const dk = dks[i];
+
+      const col = document.createElement("div");
+      col.className = "day-col";
+      col.dataset.dk = dk;
+
+      const head = document.createElement("div");
+      head.className = "day-head";
+      head.innerHTML = `
+        <span class="day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
+        <span class="day-name">${DAY_NAMES[i]}</span>
+      `;
+      col.appendChild(head);
+
+      const notesCol = document.createElement("div");
+      notesCol.className = "notes-col";
+      notesData[dk].forEach((_, index) => {
+        notesCol.appendChild(buildCell(dk, index));
+      });
+      col.appendChild(notesCol);
+
+      grid.appendChild(col);
+    });
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => { weekOffset -= 1; render(); });
+  document.getElementById("nextBtn").addEventListener("click", () => { weekOffset += 1; render(); });
+  document.getElementById("todayBtn").addEventListener("click", () => { weekOffset = 0; render(); });
+
+  render();
+</script>
+
+</body>
+</html>
