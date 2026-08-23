@@ -148,7 +148,7 @@
     align-items: stretch;
   }
   .note-cell:hover {
-    border-color: var(--box-border-hover);
+    border-color: #000000;
   }
   .note-text-btn,
   .note-text-input {
@@ -522,7 +522,7 @@
 
   function ensureDay(dk) {
     if (!notesData[dk]) {
-      notesData[dk] = Array.from({ length: 13 }, () => ({ text: "", completed: false }));
+      notesData[dk] = Array.from({ length: 11 }, () => ({ text: "", completed: false }));
     }
     return notesData[dk];
   }
@@ -778,24 +778,22 @@
 
   function maybeGrowAll(dk, index) {
     if (index === notesData[dk].length - 1) {
-      growAllDays();
+      growDay(dk);
       window.requestAnimationFrame(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       });
     }
   }
 
-  function growAllDays() {
+  function growDay(dk) {
     const grid = document.getElementById("weekGrid");
-    const cols = grid.querySelectorAll(".day-col");
-    cols.forEach((col) => {
-      const dk = col.dataset.dk;
-      const arr = ensureDay(dk);
-      const nextIndex = arr.length;
-      arr.push({ text: "", completed: false });
-      const notesCol = col.querySelector(".notes-col");
-      notesCol.appendChild(buildCell(dk, nextIndex));
-    });
+    const col = grid.querySelector(`.day-col[data-dk="${dk}"]`);
+    if (!col) return;
+    const arr = ensureDay(dk);
+    const nextIndex = arr.length;
+    arr.push({ text: "", completed: false });
+    const notesCol = col.querySelector(".notes-col");
+    notesCol.appendChild(buildCell(dk, nextIndex));
   }
 
   function balanceWeek(dks) {
