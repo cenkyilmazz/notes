@@ -915,6 +915,10 @@
     focusTodayFirstCell();
   });
 
+  onboardingOverlay.addEventListener("click", (e) => {
+    if (e.target === onboardingOverlay) closeOnboarding();
+  });
+
   // ---- "First note completed" celebration popup ----
   const completeOverlay = document.getElementById("completeOverlay");
   const completeContinueBtn = document.getElementById("completeContinueBtn");
@@ -953,6 +957,10 @@
   }
 
   completeContinueBtn.addEventListener("click", closeCompleteCelebration);
+
+  completeOverlay.addEventListener("click", (e) => {
+    if (e.target === completeOverlay) closeCompleteCelebration();
+  });
 
   function render() {
     const dates = getWorkweek(weekOffset);
