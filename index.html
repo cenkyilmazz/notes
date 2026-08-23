@@ -475,12 +475,12 @@
   const ROW_GAP = 8;
 
   const TICK_SVG = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.5 9.5L7.85714 12L12 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6 9L8.17582 11L12 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="9" cy="9" r="8" stroke="black" stroke-width="2"/>
 </svg>`;
   const TICK_HOVER_SVG = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <circle cx="9" cy="9" r="8" fill="black" stroke="black" stroke-width="2"/>
-<path d="M5.5 9.5L7.85714 12L12 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6 9L8.17582 11L12 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
   let weekOffset = 0;
@@ -522,7 +522,7 @@
 
   function ensureDay(dk) {
     if (!notesData[dk]) {
-      notesData[dk] = Array.from({ length: 11 }, () => ({ text: "", completed: false }));
+      notesData[dk] = Array.from({ length: 12 }, () => ({ text: "", completed: false }));
     }
     return notesData[dk];
   }
@@ -796,23 +796,12 @@
     notesCol.appendChild(buildCell(dk, nextIndex));
   }
 
-  function balanceWeek(dks) {
-    let maxLen = 0;
-    dks.forEach((dk) => { maxLen = Math.max(maxLen, notesData[dk].length); });
-    dks.forEach((dk) => {
-      while (notesData[dk].length < maxLen) {
-        notesData[dk].push({ text: "", completed: false });
-      }
-    });
-  }
-
   function render() {
     const dates = getWorkweek(weekOffset);
     document.getElementById("monthTitle").textContent = monthLabel(dates);
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
-    balanceWeek(dks);
 
     const grid = document.getElementById("weekGrid");
     grid.innerHTML = "";
