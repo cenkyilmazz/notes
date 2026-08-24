@@ -771,6 +771,7 @@
       const chip = document.createElement("span");
       chip.className = "note-chip";
       chip.style.background = item.completed ? hexToRgba(item.color, 0.5) : item.color;
+      chip.style.color = item.completed ? "#9C9C97" : "#141414";
       chip.style.textDecoration = item.completed ? "line-through" : "none";
       chip.textContent = item.text;
       btn.appendChild(chip);
