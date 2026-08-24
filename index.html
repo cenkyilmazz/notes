@@ -172,7 +172,15 @@
     text-overflow: ellipsis;
   }
   .note-text-btn.has-chip { padding-left: 6px; }
-  .note-text-btn { cursor: pointer; display: flex; align-items: center; }
+  .note-text-btn { cursor: pointer; display: flex; align-items: center; min-width: 0; }
+  .note-plain-text {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
   .note-chip {
     display: inline-block;
     max-width: 100%;
@@ -1028,7 +1036,10 @@
       btn.appendChild(chip);
     } else {
       btn.classList.remove("has-chip");
-      btn.textContent = item.text;
+      const plain = document.createElement("span");
+      plain.className = "note-plain-text";
+      plain.textContent = item.text;
+      btn.appendChild(plain);
     }
   }
 
