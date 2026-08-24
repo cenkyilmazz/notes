@@ -984,7 +984,7 @@
 
   function render() {
     const dates = getWorkweek(weekOffset);
-    document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / Weekly Planning</span>`;
+    document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / Weekly To-Do List</span>`;
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
