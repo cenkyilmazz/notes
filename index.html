@@ -55,6 +55,9 @@
     margin: 0;
     color: var(--ink);
   }
+  .month-title .month-subtitle {
+    color: #C4C4C4;
+  }
   .now-btn {
     position: relative;
     width: 44px;
@@ -975,7 +978,7 @@
 
   function render() {
     const dates = getWorkweek(weekOffset);
-    document.getElementById("monthTitle").textContent = monthLabel(dates);
+    document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / Weekly Planning</span>`;
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
