@@ -425,6 +425,40 @@
   .hamburger-btn:hover .hamburger-hover,
   .reminder-btn:hover .reminder-hover,
   .jira-btn:hover .jira-hover { opacity: 1; }
+  .jira-wrapper {
+    position: relative;
+  }
+  .jira-menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid #E4E4E7;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 6px;
+    z-index: 20;
+    min-width: 120px;
+  }
+  .jira-menu.open { display: block; }
+  .jira-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #09090B;
+    cursor: pointer;
+  }
+  .jira-menu-item:hover {
+    background: #F4F4F5;
+  }
   .icon-btn {
     background: none;
     border: none;
@@ -630,18 +664,24 @@
             <path d="M14 21V22C14 22.7956 14.3161 23.5587 14.8787 24.1213C15.4413 24.6839 16.2044 25 17 25C17.7956 25 18.5587 24.6839 19.1213 24.1213C19.6839 23.5587 20 22.7956 20 22V21" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="icon-btn jira-btn" id="modalJiraBtn" aria-label="JIRA'da task aç">
-          <svg class="jira-default" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="32" height="32" rx="16" fill="white"/>
-            <rect x="1" y="1" width="32" height="32" rx="16" stroke="#C9C9C9" stroke-width="2"/>
-            <path d="M13 21L21 13M21 13H14.6M21 13V19.4" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <svg class="jira-hover" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="32" height="32" rx="16" fill="#C9C9C9"/>
-            <rect x="1" y="1" width="32" height="32" rx="16" stroke="#C9C9C9" stroke-width="2"/>
-            <path d="M13 21L21 13M21 13H14.6M21 13V19.4" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <div class="jira-wrapper" id="jiraWrapper">
+          <button class="icon-btn jira-btn" id="modalJiraBtn" aria-label="JIRA'da task aç">
+            <svg class="jira-default" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="32" height="32" rx="16" fill="white"/>
+              <rect x="1" y="1" width="32" height="32" rx="16" stroke="#C9C9C9" stroke-width="2"/>
+              <path d="M13 21L21 13M21 13H14.6M21 13V19.4" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="jira-hover" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="32" height="32" rx="16" fill="#C9C9C9"/>
+              <rect x="1" y="1" width="32" height="32" rx="16" stroke="#C9C9C9" stroke-width="2"/>
+              <path d="M13 21L21 13M21 13H14.6M21 13V19.4" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="jira-menu" id="jiraMenu">
+            <button type="button" class="jira-menu-item" data-project="OCU">OCU</button>
+            <button type="button" class="jira-menu-item" data-project="TEXUX">TEXUX</button>
+          </div>
+        </div>
         <button class="icon-btn close-btn" id="modalCloseBtn" aria-label="Close">
           <svg class="close-default" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="1" y="1" width="32" height="32" rx="16" fill="white"/>
@@ -979,12 +1019,33 @@
     saveToStorage();
   });
 
-  document.getElementById("modalJiraBtn").addEventListener("click", () => {
+  const JIRA_PROJECTS = {
+    OCU: { pid: 16503, issuetype: 3 },
+    TEXUX: { pid: 15500, issuetype: 3 },
+  };
+  const jiraMenu = document.getElementById("jiraMenu");
+
+  document.getElementById("modalJiraBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
     if (!modalTarget) return;
+    jiraMenu.classList.toggle("open");
+  });
+
+  jiraMenu.addEventListener("click", (e) => {
+    const item = e.target.closest(".jira-menu-item");
+    if (!item || !modalTarget) return;
     const summary = modalTextarea.value.trim();
+    jiraMenu.classList.remove("open");
     if (!summary) return;
-    const url = "https://jtracker.trendyol.com/secure/CreateIssueDetails!init.jspa?pid=16503&issuetype=3&summary=" + encodeURIComponent(summary);
+    const proj = JIRA_PROJECTS[item.dataset.project];
+    const url = "https://jtracker.trendyol.com/secure/CreateIssueDetails!init.jspa?pid=" + proj.pid + "&issuetype=" + proj.issuetype + "&summary=" + encodeURIComponent(summary);
     window.open(url, "_blank");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!jiraMenu.contains(e.target) && e.target.id !== "modalJiraBtn") {
+      jiraMenu.classList.remove("open");
+    }
   });
 
   document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
