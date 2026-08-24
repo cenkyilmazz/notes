@@ -518,26 +518,31 @@
     margin-top: 18px;
   }
   .tag-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #FFFFFF;
-    border: 2px solid #EFEFEF;
-    border-radius: 7px;
+    position: relative;
+    width: 104px;
     height: 38px;
-    padding: 0 14px;
-    box-sizing: border-box;
   }
+  .tag-pill-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 104px;
+    height: 38px;
+    display: none;
+    pointer-events: none;
+  }
+  .tag-pill-bg.active { display: block; }
   .tag-dot {
+    position: absolute;
+    top: 13px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     border: none;
+    background: none;
     padding: 0;
     cursor: pointer;
-  }
-  .tag-dot.selected {
-    box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #000000;
+    z-index: 2;
   }
   .modal-footer-actions {
     display: flex;
@@ -749,11 +754,65 @@
 
     <div class="modal-footer">
       <div class="tag-pill" id="tagPill">
-        <button class="tag-dot" data-color="#21FFA1" style="background:#21FFA1" aria-label="Tag color 1"></button>
-        <button class="tag-dot" data-color="#FDF05E" style="background:#FDF05E" aria-label="Tag color 2"></button>
-        <button class="tag-dot" data-color="#6BCDF4" style="background:#6BCDF4" aria-label="Tag color 3"></button>
-        <button class="tag-dot" data-color="#FF8EF6" style="background:#FF8EF6" aria-label="Tag color 4"></button>
-        <button class="tag-dot" data-color="#ABB6FF" style="background:#ABB6FF" aria-label="Tag color 5"></button>
+        <svg class="tag-pill-bg active" data-state="" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF"/>
+        </svg>
+        <svg class="tag-pill-bg" data-state="#21FFA1" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1" stroke="black" stroke-width="2"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF"/>
+        </svg>
+        <svg class="tag-pill-bg" data-state="#FDF05E" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E" stroke="black" stroke-width="2"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF"/>
+        </svg>
+        <svg class="tag-pill-bg" data-state="#6BCDF4" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4" stroke="black" stroke-width="2"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF"/>
+        </svg>
+        <svg class="tag-pill-bg" data-state="#FF8EF6" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6" stroke="black" stroke-width="2"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF"/>
+        </svg>
+        <svg class="tag-pill-bg" data-state="#ABB6FF" width="104" height="38" viewBox="0 0 104 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="102" height="36" rx="7" fill="white"/>
+          <rect x="1" y="1" width="102" height="36" rx="7" stroke="#EFEFEF" stroke-width="2"/>
+          <circle cx="20" cy="19" r="6" fill="#21FFA1"/>
+          <circle cx="36" cy="19" r="6" fill="#FDF05E"/>
+          <circle cx="52" cy="19" r="6" fill="#6BCDF4"/>
+          <circle cx="68" cy="19" r="6" fill="#FF8EF6"/>
+          <circle cx="84" cy="19" r="6" fill="#ABB6FF" stroke="black" stroke-width="2"/>
+        </svg>
+        <button class="tag-dot" data-color="#21FFA1" style="left:14px" aria-label="Tag color 1"></button>
+        <button class="tag-dot" data-color="#FDF05E" style="left:30px" aria-label="Tag color 2"></button>
+        <button class="tag-dot" data-color="#6BCDF4" style="left:46px" aria-label="Tag color 3"></button>
+        <button class="tag-dot" data-color="#FF8EF6" style="left:62px" aria-label="Tag color 4"></button>
+        <button class="tag-dot" data-color="#ABB6FF" style="left:78px" aria-label="Tag color 5"></button>
       </div>
       <div class="modal-footer-actions">
         <button id="modalDeleteBtn" aria-label="Delete">
@@ -1034,8 +1093,8 @@
   }
 
   function updateTagSelection() {
-    tagPill.querySelectorAll(".tag-dot").forEach((dot) => {
-      dot.classList.toggle("selected", dot.dataset.color === modalSelectedColor);
+    tagPill.querySelectorAll(".tag-pill-bg").forEach((bg) => {
+      bg.classList.toggle("active", bg.dataset.state === (modalSelectedColor || ""));
     });
   }
 
