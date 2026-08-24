@@ -738,11 +738,18 @@
     const current = wrapper.querySelector(".note-text-btn, .note-text-input");
     if (!current || current.tagName === "INPUT") return;
 
+    let moveToNext = false;
     const input = document.createElement("input");
     input.className = "note-text-input";
     input.value = notesData[dk][index].text;
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === "Escape") input.blur();
+      if (e.key === "Enter") {
+        e.preventDefault();
+        moveToNext = true;
+        input.blur();
+      } else if (e.key === "Escape") {
+        input.blur();
+      }
     });
     input.addEventListener("blur", () => {
       notesData[dk][index].text = input.value;
@@ -750,10 +757,40 @@
       input.replaceWith(btn);
       updateCellState(wrapper, dk, index);
       saveToStorage();
+      if (moveToNext) {
+        focusNextCell(dk, index);
+      }
     });
     current.replaceWith(input);
     input.focus();
     input.select();
+  }
+
+  function focusNextCell(dk, index) {
+    const arr = notesData[dk];
+    const nextIndex = index + 1;
+    let grew = false;
+    if (nextIndex >= arr.length) {
+      growDay(dk);
+      grew = true;
+    }
+    const grid = document.getElementById("weekGrid");
+    const col = grid.querySelector(`.day-col[data-dk="${dk}"]`);
+    if (!col) return;
+    const notesCol = col.querySelector(".notes-col");
+    const nextWrapper = notesCol.children[nextIndex];
+    if (!nextWrapper) return;
+    const item = arr[nextIndex];
+    if (item.text.trim().length === 0) {
+      startInlineEdit(nextWrapper, dk, nextIndex);
+    } else {
+      openModal(dk, nextIndex);
+    }
+    if (grew) {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      });
+    }
   }
 
   function hexToRgba(hex, alpha) {
