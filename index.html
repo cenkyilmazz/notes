@@ -582,7 +582,7 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 18px;
+    width: 14px;
     height: 18px;
     background: none;
     border: none;
@@ -590,10 +590,10 @@
     cursor: pointer;
     z-index: 3;
   }
-  .cell-mic-btn svg { display: block; width: 18px; height: 18px; }
-  .cell-mic-btn .cell-mic-active { display: none; }
-  .cell-mic-btn.listening .cell-mic-idle { display: none; }
-  .cell-mic-btn.listening .cell-mic-active { display: block; animation: mic-pulse 1.1s ease-in-out infinite; }
+  .cell-mic-btn img { position: absolute; top: 0; left: 0; opacity: 0; }
+  .cell-mic-btn .cell-mic-idle-img.active { opacity: 1; }
+  .cell-mic-btn.listening .cell-mic-idle-img { opacity: 0; }
+  .cell-mic-btn.listening .cell-mic-active-img { opacity: 1; animation: mic-pulse 1.1s ease-in-out infinite; }
   .modal-footer {
     display: flex;
     align-items: center;
@@ -1154,16 +1154,8 @@
       micBtn.className = "cell-mic-btn";
       micBtn.setAttribute("aria-label", "Sesle yaz");
       micBtn.innerHTML =
-        '<svg class="cell-mic-idle" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="6.5" y="2.5" width="5" height="8" rx="2.5" stroke="#9C9C97" stroke-width="1.6"/>' +
-        '<path d="M4 9C4 11.76 6.24 14 9 14C11.76 14 14 11.76 14 9" stroke="#9C9C97" stroke-width="1.6" stroke-linecap="round"/>' +
-        '<path d="M9 14V16" stroke="#9C9C97" stroke-width="1.6" stroke-linecap="round"/>' +
-        '</svg>' +
-        '<svg class="cell-mic-active" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="6.5" y="2.5" width="5" height="8" rx="2.5" stroke="#DC2727" stroke-width="1.6"/>' +
-        '<path d="M4 9C4 11.76 6.24 14 9 14C11.76 14 14 11.76 14 9" stroke="#DC2727" stroke-width="1.6" stroke-linecap="round"/>' +
-        '<path d="M9 14V16" stroke="#DC2727" stroke-width="1.6" stroke-linecap="round"/>' +
-        '</svg>';
+        '<img class="cell-mic-idle-img active" src="assets/mic-idle.svg" alt="" width="14" height="18">' +
+        '<img class="cell-mic-active-img" src="assets/mic-recording.svg" alt="" width="14" height="18">';
       micBtn.addEventListener("mousedown", (e) => e.preventDefault());
       micBtn.addEventListener("click", (e) => {
         e.stopPropagation();
