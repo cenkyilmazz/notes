@@ -380,14 +380,14 @@
     align-items: flex-start;
     justify-content: center;
     z-index: 1000;
-    padding: 120px 24px 24px 24px;
+    padding: 140px 24px 24px 24px;
     opacity: 0;
     transition: opacity 0.2s ease;
   }
   .search-overlay.visible { display: flex; }
   .search-overlay.open { opacity: 1; }
   .search-bar {
-    width: 1200px;
+    width: 642px;
     max-width: 100%;
     background: #FFFFFF;
     border-radius: 12px;
@@ -424,7 +424,8 @@
     border: none;
     padding: 0;
     line-height: 0;
-    cursor: pointer;
+    cursor: default;
+    pointer-events: none;
   }
   .search-icon-btn img { display: block; width: 28px; height: 28px; }
   .modal-card {
@@ -1753,11 +1754,6 @@
     if (e.key === "Escape" && searchOverlay.classList.contains("open")) {
       closeSearch();
     }
-  });
-
-  document.getElementById("searchSubmitBtn").addEventListener("click", () => {
-    // TODO: Arama davranışı belirlenecek
-    console.log("Search submit:", searchInput.value);
   });
 
   searchInput.addEventListener("keydown", (e) => {
