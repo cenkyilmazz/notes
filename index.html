@@ -111,27 +111,13 @@
     .grid { grid-template-columns: 1fr; }
   }
   .day-col {
-    position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
     padding: 24px 24px 24px 24px;
     border-right: 2px solid #000000;
-    border-top: 2px solid transparent;
   }
   .day-col:last-child { border-right: none; }
-  .day-col-today {
-    border-top-color: transparent;
-  }
-  .day-col-today::before {
-    content: "";
-    position: absolute;
-    top: -2px;
-    left: 0;
-    right: -2px;
-    height: 2px;
-    background: #FD6119;
-  }
   .day-head {
     display: flex;
     align-items: baseline;
@@ -1738,7 +1724,6 @@
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
-    const todayKey = effectiveTodayKey();
 
     const grid = document.getElementById("weekGrid");
     grid.innerHTML = "";
@@ -1747,7 +1732,7 @@
       const dk = dks[i];
 
       const col = document.createElement("div");
-      col.className = dk === todayKey ? "day-col day-col-enter day-col-today" : "day-col day-col-enter";
+      col.className = "day-col day-col-enter";
       col.style.animationDelay = `${i * 60}ms`;
       col.dataset.dk = dk;
 
