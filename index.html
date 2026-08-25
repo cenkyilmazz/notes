@@ -388,7 +388,7 @@
     align-items: flex-start;
     justify-content: center;
     z-index: 1000;
-    padding: 140px 24px 24px 24px;
+    padding: 130px 24px 24px 24px;
     opacity: 0;
     transition: opacity 0.2s ease;
   }
@@ -1818,6 +1818,11 @@
     return new Date(y, m - 1, d);
   }
 
+  function textMatchesQuery(text, q) {
+    const words = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    return words.some((w) => w.startsWith(q));
+  }
+
   function runSearch(query) {
     const q = query.trim().toLowerCase();
     searchResults.innerHTML = "";
@@ -1830,7 +1835,7 @@
     const matches = [];
     Object.keys(notesData).forEach((dk) => {
       notesData[dk].forEach((item, index) => {
-        if (item.text && item.text.toLowerCase().includes(q)) {
+        if (item.text && textMatchesQuery(item.text, q)) {
           matches.push({ dk, index, text: item.text });
         }
       });
