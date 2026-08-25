@@ -416,18 +416,26 @@
     color: #000000;
   }
   .search-input::placeholder { color: #9C9C97; }
-  .search-icon-btn {
+  .search-clear-btn {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     background: none;
     border: none;
     padding: 0;
     line-height: 0;
-    cursor: default;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
+    transition: opacity 0.15s ease;
   }
-  .search-icon-btn img { display: block; width: 28px; height: 28px; }
+  .search-clear-btn.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .search-clear-btn img { display: block; width: 24px; height: 24px; }
   .modal-card {
     width: 552px;
     max-width: 100%;
@@ -805,8 +813,8 @@
 <div class="search-overlay" id="searchOverlay">
   <div class="search-bar">
     <input type="text" class="search-input" id="searchInput" placeholder="Search" autocomplete="off">
-    <button type="button" class="search-icon-btn" id="searchSubmitBtn" aria-label="Search">
-      <img src="assets/search-mini.svg" alt="" width="28" height="28">
+    <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Aramayı temizle">
+      <img src="assets/delete-mini.svg" alt="" width="24" height="24">
     </button>
   </div>
 </div>
@@ -1723,6 +1731,11 @@
   document.getElementById("nextBtn").addEventListener("click", () => { weekOffset += 1; render(); });
   const searchOverlay = document.getElementById("searchOverlay");
   const searchInput = document.getElementById("searchInput");
+  const searchClearBtn = document.getElementById("searchClearBtn");
+
+  function updateSearchClearBtn() {
+    searchClearBtn.classList.toggle("show", searchInput.value.length > 0);
+  }
 
   function openSearch() {
     searchOverlay.classList.add("visible");
@@ -1739,6 +1752,7 @@
     setTimeout(() => {
       searchOverlay.classList.remove("visible");
       searchInput.value = "";
+      updateSearchClearBtn();
     }, 200);
   }
 
@@ -1754,6 +1768,14 @@
     if (e.key === "Escape" && searchOverlay.classList.contains("open")) {
       closeSearch();
     }
+  });
+
+  searchInput.addEventListener("input", updateSearchClearBtn);
+
+  searchClearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    updateSearchClearBtn();
+    searchInput.focus();
   });
 
   searchInput.addEventListener("keydown", (e) => {
