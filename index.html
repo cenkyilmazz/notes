@@ -2013,7 +2013,12 @@
     searchInput.focus();
   });
 
-  document.getElementById("nowBtn").addEventListener("click", () => { weekOffset = 0; render(); maybeShowOnboarding(); });
+  document.getElementById("nowBtn").addEventListener("click", () => {
+    if (weekOffset === 0) return;
+    weekOffset = 0;
+    render();
+    maybeShowOnboarding();
+  });
 
   loadFromStorage();
   render();
