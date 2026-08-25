@@ -2045,7 +2045,7 @@
   }, 2000);
 
   // ---- Daily notification reminders (09:00 / 12:00 / 15:00 / 18:00) ----
-  const DAILY_CHECK_TIMES = [[9, 0], [12, 0], [15, 0], [18, 0], [19, 2]];
+  const DAILY_CHECK_TIMES = [[9, 0], [12, 0], [15, 0], [18, 0], [19, 10]];
 
   function getIncompleteCountForToday() {
     const dk = effectiveTodayKey();
@@ -2085,10 +2085,13 @@
   }
 
   if (typeof Notification !== "undefined") {
+    scheduleNextDailyCheck();
     if (Notification.permission === "default") {
-      Notification.requestPermission().then(() => scheduleNextDailyCheck());
-    } else {
-      scheduleNextDailyCheck();
+      const requestOnFirstClick = () => {
+        document.removeEventListener("click", requestOnFirstClick);
+        Notification.requestPermission();
+      };
+      document.addEventListener("click", requestOnFirstClick);
     }
   }
 </script>
