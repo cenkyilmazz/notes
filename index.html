@@ -268,60 +268,6 @@
   .app-root.visible {
     display: flex;
   }
-  .shared-view {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 3000;
-    background: var(--bg);
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .shared-view.visible { display: flex; }
-  .shared-card {
-    width: 552px;
-    max-width: 100%;
-    background: #FFFFFF;
-    border: 2px solid var(--box-border);
-    border-radius: 12px;
-    padding: 28px;
-    box-sizing: border-box;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: fadeSlideUp 0.4s ease both;
-  }
-  .shared-date {
-    font-family: "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: -0.5px;
-    color: #000000;
-    margin-bottom: 16px;
-  }
-  .shared-text {
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    font-size: 18px;
-    letter-spacing: -0.2px;
-    line-height: 25px;
-    color: #000000;
-    white-space: pre-wrap;
-    word-break: break-word;
-    border: 2px solid var(--box-border);
-    border-radius: 8px;
-    padding: 12px;
-    min-height: 100px;
-  }
-  .shared-cta {
-    display: inline-block;
-    margin-top: 20px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: #FD6119;
-    text-decoration: none;
-  }
-  .shared-cta:hover { text-decoration: underline; }
   .teaser-overlay {
     position: fixed;
     inset: 0;
@@ -911,14 +857,6 @@
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-
-<div class="shared-view" id="sharedView">
-  <div class="shared-card">
-    <div class="shared-date" id="sharedDate"></div>
-    <div class="shared-text" id="sharedText"></div>
-    <a class="shared-cta" href="/">Kendi notlarını oluştur →</a>
-  </div>
-</div>
 
 <div class="teaser-overlay" id="teaserOverlay">
   <div class="teaser-logo-wrap">
@@ -2086,96 +2024,34 @@
     maybeShowOnboarding();
   });
 
-  // ---- Shared note (read-only link) ----
-  function encodeShareData(obj) {
-    const json = JSON.stringify(obj);
-    return btoa(unescape(encodeURIComponent(json)))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  function decodeShareData(str) {
-    let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
-    while (b64.length % 4) b64 += "=";
-    const json = decodeURIComponent(escape(atob(b64)));
-    return JSON.parse(json);
-  }
-  function formatShareDate(dk) {
-    const [y, m, d] = dk.split("-").map(Number);
-    const date = new Date(y, m - 1, d);
-    const dayName = FULL_DAY_NAMES_ALL[date.getDay()];
-    return `${dayName}, ${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
-  }
-  function shareCurrentNote() {
-    if (!modalTarget) return;
-    const { dk, index } = modalTarget;
-    const item = notesData[dk][index];
-    if (!item.text || !item.text.trim()) return;
-    const payload = { dk, text: item.text, color: item.color || null, completed: !!item.completed };
-    const encoded = encodeShareData(payload);
-    const url = `${location.origin}${location.pathname}?shared=${encoded}`;
-    const showFeedback = () => {
-      const btn = document.getElementById("modalHamburgerBtn");
-      if (!btn) return;
-      const tip = document.createElement("div");
-      tip.textContent = "Link kopyalandı!";
-      tip.style.cssText = "position:absolute;top:40px;left:50%;transform:translateX(-50%);background:#000;color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:6px 10px;border-radius:6px;white-space:nowrap;z-index:30;";
-      btn.appendChild(tip);
-      setTimeout(() => tip.remove(), 1500);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(showFeedback).catch(() => window.prompt("Linki kopyala:", url));
-    } else {
-      window.prompt("Linki kopyala:", url);
+  loadFromStorage();
+  render();
+  maybeShowOnboarding();
+
+  // ---- Teaser splash ----
+  const teaserOverlay = document.getElementById("teaserOverlay");
+  const appRoot = document.getElementById("appRoot");
+  const teaserLogoVideo = document.getElementById("teaserLogoVideo");
+
+  const hideVideoOnFailure = () => {
+    teaserLogoVideo.style.display = "none";
+  };
+
+  if (teaserLogoVideo) {
+    teaserLogoVideo.addEventListener("error", hideVideoOnFailure);
+    const playPromise = teaserLogoVideo.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {});
     }
   }
 
-  const sharedParam = new URLSearchParams(location.search).get("shared");
-  const isSharedMode = !!sharedParam;
-
-  if (isSharedMode) {
-    try {
-      const data = decodeShareData(sharedParam);
-      document.getElementById("sharedDate").textContent = formatShareDate(data.dk);
-      const textEl = document.getElementById("sharedText");
-      textEl.textContent = data.text;
-      if (data.completed) textEl.style.textDecoration = "line-through";
-      if (data.color) textEl.style.background = data.color;
-      document.getElementById("sharedView").classList.add("visible");
-    } catch (e) {
-      document.getElementById("sharedText").textContent = "Bu link geçersiz veya bozuk.";
-      document.getElementById("sharedView").classList.add("visible");
-    }
-  } else {
-    document.getElementById("modalHamburgerBtn").addEventListener("click", shareCurrentNote);
-
-    loadFromStorage();
-    render();
-    maybeShowOnboarding();
-
-    // ---- Teaser splash ----
-    const teaserOverlay = document.getElementById("teaserOverlay");
-    const appRoot = document.getElementById("appRoot");
-    const teaserLogoVideo = document.getElementById("teaserLogoVideo");
-
-    const hideVideoOnFailure = () => {
-      teaserLogoVideo.style.display = "none";
-    };
-
-    if (teaserLogoVideo) {
-      teaserLogoVideo.addEventListener("error", hideVideoOnFailure);
-      const playPromise = teaserLogoVideo.play();
-      if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => {});
-      }
-    }
-
+  setTimeout(() => {
+    teaserOverlay.classList.add("teaser-closing");
     setTimeout(() => {
-      teaserOverlay.classList.add("teaser-closing");
-      setTimeout(() => {
-        teaserOverlay.classList.add("teaser-hidden");
-        appRoot.classList.add("visible");
-      }, 400);
-    }, 2000);
-  }
+      teaserOverlay.classList.add("teaser-hidden");
+      appRoot.classList.add("visible");
+    }, 400);
+  }, 2000);
 
   // ---- Daily notification reminders (09:00 / 12:00 / 15:00 / 18:00) ----
   const DAILY_CHECK_TIMES = [[9, 0], [12, 0], [15, 0], [18, 0]];
@@ -2219,7 +2095,7 @@
     }, delay);
   }
 
-  if (!isSharedMode && typeof Notification !== "undefined") {
+  if (typeof Notification !== "undefined") {
     scheduleNextDailyCheck();
     if (Notification.permission === "default") {
       const requestOnFirstClick = () => {
