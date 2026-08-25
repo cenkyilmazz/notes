@@ -2047,18 +2047,20 @@
   // ---- Daily notification reminders (09:00 / 12:00 / 15:00 / 18:00) ----
   const DAILY_CHECK_TIMES = [[9, 0], [12, 0], [15, 0], [18, 0]];
 
-  function getIncompleteCountForToday() {
+  function getIncompleteNotesForToday() {
     const dk = effectiveTodayKey();
     const items = notesData[dk] || [];
-    return items.filter((item) => item.text && item.text.trim() && !item.completed).length;
+    return items
+      .filter((item) => item.text && item.text.trim() && !item.completed)
+      .map((item) => item.text.trim());
   }
 
   function performDailyCheck() {
-    const count = getIncompleteCountForToday();
-    if (count > 0 && typeof Notification !== "undefined" && Notification.permission === "granted") {
+    const notes = getIncompleteNotesForToday();
+    if (notes.length > 0 && typeof Notification !== "undefined" && Notification.permission === "granted") {
       try {
         new Notification("Hatırlatma", {
-          body: count === 1 ? "Tamamlanmamış 1 notun var." : `Tamamlanmamış ${count} notun var.`,
+          body: notes.map((t) => `• ${t}`).join("\n"),
         });
       } catch (e) {}
     }
