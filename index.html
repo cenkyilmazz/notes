@@ -430,8 +430,8 @@
     box-sizing: border-box;
     overflow-y: auto;
     opacity: 0;
-    transform: translateY(-8px);
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    transform: translateY(14px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
   }
   .search-panel.has-query .search-results { display: flex; }
   .search-results.show {
@@ -1826,8 +1826,7 @@
   }
 
   function textMatchesQuery(text, q) {
-    const words = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-    return words.some((w) => w.startsWith(q));
+    return text.trim().toLowerCase().startsWith(q);
   }
 
   function hideSearchResults() {
@@ -1836,7 +1835,7 @@
     setTimeout(() => {
       searchPanel.classList.remove("has-query");
       searchResults.innerHTML = "";
-    }, 180);
+    }, 350);
   }
 
   function showSearchResults() {
