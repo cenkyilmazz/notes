@@ -525,6 +525,7 @@
     width: 100px;
     height: 116px;
   }
+  .reminder-img-wrap.has-reminder { height: 154px; }
   .reminder-img {
     position: absolute;
     top: 0;
@@ -536,6 +537,15 @@
     pointer-events: none;
   }
   .reminder-img.active { opacity: 1; }
+  .reminder-img-with-clear {
+    height: 154px;
+    z-index: 1;
+  }
+  .reminder-img-row1,
+  .reminder-img-row2,
+  .reminder-img-row3 {
+    z-index: 2;
+  }
   .reminder-row {
     position: absolute;
     left: 0;
@@ -545,40 +555,14 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
+    z-index: 3;
   }
-  .reminder-menu-status {
+  .reminder-row-clear {
     display: none;
-    padding: 6px 2px 4px;
-    font-family: "Inter", sans-serif;
-    font-size: 12px;
-    color: var(--muted);
   }
-  .reminder-menu-status.show { display: block; }
-  .reminder-menu-item {
+  .reminder-img-wrap.has-reminder .reminder-row-clear {
     display: block;
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 2px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: #09090B;
-    cursor: pointer;
   }
-  .reminder-menu-item:hover {
-    background: #F4F4F5;
-  }
-  .reminder-menu-clear {
-    display: none;
-    color: #DC2727;
-    border-top: 1px solid #F0F0F0;
-    margin-top: 4px;
-    padding-top: 8px;
-  }
-  .reminder-menu-clear.show { display: block; }
   .icon-btn {
     background: none;
     border: none;
@@ -875,15 +859,15 @@
           <div class="reminder-menu" id="reminderMenu">
             <div class="reminder-img-wrap" id="reminderImgWrap">
               <img class="reminder-img reminder-img-base active" src="assets/reminder-default.svg" alt="" width="100" height="116">
+              <img class="reminder-img reminder-img-with-clear" src="assets/reminder-with-clear.svg" alt="" width="100" height="154">
               <img class="reminder-img reminder-img-row1" src="assets/reminder-row1.svg" alt="" width="100" height="116">
               <img class="reminder-img reminder-img-row2" src="assets/reminder-row2.svg" alt="" width="100" height="116">
               <img class="reminder-img reminder-img-row3" src="assets/reminder-row3.svg" alt="" width="100" height="116">
               <button type="button" class="reminder-row" id="reminderRow1" style="top:0px;height:39px" aria-label="1 saat sonra"></button>
               <button type="button" class="reminder-row" id="reminderRow2" style="top:39px;height:38px" aria-label="3 saat sonra"></button>
               <button type="button" class="reminder-row" id="reminderRow3" style="top:77px;height:39px" aria-label="Yarın 09:00"></button>
+              <button type="button" class="reminder-row reminder-row-clear" id="reminderClearBtn" style="top:115px;height:39px" aria-label="Hatırlatmayı kaldır"></button>
             </div>
-            <div class="reminder-menu-status" id="reminderMenuStatus"></div>
-            <button type="button" class="reminder-menu-item reminder-menu-clear" id="reminderClearBtn">Hatırlatmayı kaldır</button>
           </div>
         </div>
         <button class="icon-btn hamburger-btn" id="modalHamburgerBtn" aria-label="Menu">
@@ -1464,7 +1448,7 @@
 
   // ---- Reminders ----
   const reminderMenu = document.getElementById("reminderMenu");
-  const reminderMenuStatus = document.getElementById("reminderMenuStatus");
+  const reminderImgWrap = document.getElementById("reminderImgWrap");
   const reminderClearBtn = document.getElementById("reminderClearBtn");
   const reminderBtn = document.getElementById("modalReminderBtn");
   const reminderTimers = {};
@@ -1473,28 +1457,14 @@
     return dk + "::" + index;
   }
 
-  function formatReminderTime(ts) {
-    const d = new Date(ts);
-    const dayName = FULL_DAY_NAMES[(d.getDay() + 6) % 7];
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${dayName}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${hh}:${mm}`;
-  }
-
   function updateReminderUI() {
     if (!modalTarget) return;
     const { dk, index } = modalTarget;
     const item = notesData[dk][index];
     const hasReminder = !!(item.reminder && item.reminder > Date.now());
     reminderBtn.classList.toggle("has-reminder", hasReminder);
-    if (hasReminder) {
-      reminderMenuStatus.textContent = "Hatırlatma: " + formatReminderTime(item.reminder);
-      reminderMenuStatus.classList.add("show");
-      reminderClearBtn.classList.add("show");
-    } else {
-      reminderMenuStatus.classList.remove("show");
-      reminderClearBtn.classList.remove("show");
-    }
+    reminderImgWrap.classList.toggle("has-reminder", hasReminder);
+    setActiveReminderImg(hasReminder ? reminderImgWithClear : reminderImgBase);
   }
 
   function scheduleReminder(dk, index, time) {
@@ -1575,28 +1545,33 @@
   const reminderRow2 = document.getElementById("reminderRow2");
   const reminderRow3 = document.getElementById("reminderRow3");
   const reminderImgBase = reminderMenu.querySelector(".reminder-img-base");
+  const reminderImgWithClear = reminderMenu.querySelector(".reminder-img-with-clear");
   const reminderImgRow1 = reminderMenu.querySelector(".reminder-img-row1");
   const reminderImgRow2 = reminderMenu.querySelector(".reminder-img-row2");
   const reminderImgRow3 = reminderMenu.querySelector(".reminder-img-row3");
-  const reminderImgs = [reminderImgBase, reminderImgRow1, reminderImgRow2, reminderImgRow3];
+  const reminderImgs = [reminderImgBase, reminderImgWithClear, reminderImgRow1, reminderImgRow2, reminderImgRow3];
 
   function setActiveReminderImg(img) {
     reminderImgs.forEach((el) => el.classList.toggle("active", el === img));
+  }
+
+  function currentReminderBaseImg() {
+    return reminderImgWrap.classList.contains("has-reminder") ? reminderImgWithClear : reminderImgBase;
   }
 
   reminderBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     if (!modalTarget) return;
     reminderMenu.classList.toggle("open");
-    setActiveReminderImg(reminderImgBase);
+    setActiveReminderImg(currentReminderBaseImg());
   });
 
   reminderRow1.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow1));
-  reminderRow1.addEventListener("mouseleave", () => setActiveReminderImg(reminderImgBase));
+  reminderRow1.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
   reminderRow2.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow2));
-  reminderRow2.addEventListener("mouseleave", () => setActiveReminderImg(reminderImgBase));
+  reminderRow2.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
   reminderRow3.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow3));
-  reminderRow3.addEventListener("mouseleave", () => setActiveReminderImg(reminderImgBase));
+  reminderRow3.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
 
   reminderRow1.addEventListener("click", () => setReminder(Date.now() + 60 * 60000));
   reminderRow2.addEventListener("click", () => setReminder(Date.now() + 180 * 60000));
