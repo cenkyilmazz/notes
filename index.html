@@ -546,6 +546,7 @@
   .search-input::placeholder { color: #9C9C97; }
   .search-clear-btn {
     flex-shrink: 0;
+    position: relative;
     width: 24px;
     height: 24px;
     background: none;
@@ -563,7 +564,10 @@
     visibility: visible;
     pointer-events: auto;
   }
-  .search-clear-btn img { display: block; width: 24px; height: 24px; }
+  .search-clear-btn img { position: absolute; top: 0; left: 0; width: 24px; height: 24px; }
+  .search-clear-btn .delete-mini-hover { opacity: 0; }
+  .search-clear-btn:hover .delete-mini-idle { opacity: 0; }
+  .search-clear-btn:hover .delete-mini-hover { opacity: 1; }
   .modal-card {
     width: 552px;
     max-width: 100%;
@@ -958,7 +962,8 @@
     <div class="search-bar">
       <input type="text" class="search-input" id="searchInput" placeholder="Search" autocomplete="off">
       <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Aramayı temizle">
-        <img src="assets/delete-mini.svg" alt="" width="24" height="24">
+        <img class="delete-mini-idle" src="assets/delete-mini.svg" alt="" width="24" height="24">
+        <img class="delete-mini-hover" src="assets/delete-mini-hover.svg" alt="" width="24" height="24">
       </button>
     </div>
     <div class="search-results" id="searchResults"></div>
