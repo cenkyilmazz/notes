@@ -394,23 +394,77 @@
   }
   .search-overlay.visible { display: flex; }
   .search-overlay.open { opacity: 1; }
-  .search-bar {
+  .search-panel {
     width: 642px;
     max-width: 100%;
     background: #FFFFFF;
     border-radius: 12px;
     box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(-16px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow: hidden;
+    max-height: calc(100vh - 164px);
+    display: flex;
+    flex-direction: column;
+  }
+  .search-overlay.open .search-panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .search-bar {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 20px;
     gap: 12px;
-    opacity: 0;
-    transform: translateY(-16px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
   }
-  .search-overlay.open .search-bar {
-    opacity: 1;
-    transform: translateY(0);
+  .search-panel.has-query .search-bar {
+    border-bottom: 2px solid #000000;
+  }
+  .search-results {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .search-panel.has-query .search-results { display: flex; }
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 2px solid var(--box-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    cursor: pointer;
+    text-align: left;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  .search-result-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 16px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-result-date {
+    flex-shrink: 0;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #000000;
+  }
+  .search-empty {
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 4px 2px;
   }
   .search-input {
     flex: 1 1 auto;
@@ -819,11 +873,14 @@
 </div>
 
 <div class="search-overlay" id="searchOverlay">
-  <div class="search-bar">
-    <input type="text" class="search-input" id="searchInput" placeholder="Search" autocomplete="off">
-    <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Aramayı temizle">
-      <img src="assets/delete-mini.svg" alt="" width="24" height="24">
-    </button>
+  <div class="search-panel" id="searchPanel">
+    <div class="search-bar">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search" autocomplete="off">
+      <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Aramayı temizle">
+        <img src="assets/delete-mini.svg" alt="" width="24" height="24">
+      </button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
   </div>
 </div>
 
@@ -1738,11 +1795,73 @@
   document.getElementById("prevBtn").addEventListener("click", () => { weekOffset -= 1; render(); });
   document.getElementById("nextBtn").addEventListener("click", () => { weekOffset += 1; render(); });
   const searchOverlay = document.getElementById("searchOverlay");
+  const searchPanel = document.getElementById("searchPanel");
   const searchInput = document.getElementById("searchInput");
   const searchClearBtn = document.getElementById("searchClearBtn");
+  const searchResults = document.getElementById("searchResults");
+  const FULL_DAY_NAMES_ALL = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   function updateSearchClearBtn() {
     searchClearBtn.classList.toggle("show", searchInput.value.length > 0);
+  }
+
+  function formatResultDate(dk) {
+    const [y, m, d] = dk.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    const dayName = FULL_DAY_NAMES_ALL[date.getDay()];
+    return `${dayName}, ${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  function dkToDate(dk) {
+    const [y, m, d] = dk.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function runSearch(query) {
+    const q = query.trim().toLowerCase();
+    searchResults.innerHTML = "";
+    if (!q) {
+      searchPanel.classList.remove("has-query");
+      return;
+    }
+    searchPanel.classList.add("has-query");
+
+    const matches = [];
+    Object.keys(notesData).forEach((dk) => {
+      notesData[dk].forEach((item, index) => {
+        if (item.text && item.text.toLowerCase().includes(q)) {
+          matches.push({ dk, index, text: item.text });
+        }
+      });
+    });
+    matches.sort((a, b) => dkToDate(a.dk) - dkToDate(b.dk));
+
+    if (matches.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "search-empty";
+      empty.textContent = "Sonuç bulunamadı.";
+      searchResults.appendChild(empty);
+      return;
+    }
+
+    matches.forEach((match) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "search-result-item";
+      const textSpan = document.createElement("span");
+      textSpan.className = "search-result-text";
+      textSpan.textContent = match.text;
+      const dateSpan = document.createElement("span");
+      dateSpan.className = "search-result-date";
+      dateSpan.textContent = formatResultDate(match.dk);
+      row.appendChild(textSpan);
+      row.appendChild(dateSpan);
+      row.addEventListener("click", () => {
+        closeSearch();
+        setTimeout(() => openModal(match.dk, match.index), 210);
+      });
+      searchResults.appendChild(row);
+    });
   }
 
   function openSearch() {
@@ -1760,6 +1879,8 @@
     setTimeout(() => {
       searchOverlay.classList.remove("visible");
       searchInput.value = "";
+      searchResults.innerHTML = "";
+      searchPanel.classList.remove("has-query");
       updateSearchClearBtn();
     }, 200);
   }
@@ -1778,19 +1899,16 @@
     }
   });
 
-  searchInput.addEventListener("input", updateSearchClearBtn);
+  searchInput.addEventListener("input", () => {
+    updateSearchClearBtn();
+    runSearch(searchInput.value);
+  });
 
   searchClearBtn.addEventListener("click", () => {
     searchInput.value = "";
     updateSearchClearBtn();
+    runSearch("");
     searchInput.focus();
-  });
-
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      // TODO: Arama davranışı belirlenecek
-      console.log("Search submit:", searchInput.value);
-    }
   });
 
   document.getElementById("nowBtn").addEventListener("click", () => { weekOffset = 0; render(); maybeShowOnboarding(); });
