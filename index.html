@@ -494,19 +494,10 @@
     justify-content: center;
   }
   .reminder-btn { position: relative; }
-  .reminder-dot {
-    display: none;
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #FF4D4D;
-    border: 2px solid #FFFFFF;
-    z-index: 3;
-  }
-  .reminder-btn.has-reminder .reminder-dot { display: block; }
+  .reminder-btn .reminder-filled { opacity: 0; }
+  .reminder-btn.has-reminder .reminder-default,
+  .reminder-btn.has-reminder .reminder-hover { opacity: 0; }
+  .reminder-btn.has-reminder .reminder-filled { opacity: 1; }
   .reminder-menu {
     display: none;
     position: absolute;
@@ -891,7 +882,12 @@
               <path d="M15.25 10.7143C15.25 10.2596 15.4344 9.82359 15.7626 9.5021C16.0908 9.18061 16.5359 9 17 9C17.4641 9 17.9092 9.18061 18.2374 9.5021C18.5656 9.82359 18.75 10.2596 18.75 10.7143C19.7549 11.1797 20.6115 11.9043 21.228 12.8103C21.8446 13.7162 22.1979 14.7695 22.25 15.8571V18.4286C22.3158 18.9615 22.5085 19.4718 22.8125 19.9184C23.1164 20.365 23.5232 20.7355 24 21H10C10.4768 20.7355 10.8836 20.365 11.1875 19.9184C11.4915 19.4718 11.6842 18.9615 11.75 18.4286V15.8571C11.8021 14.7695 12.1554 13.7162 12.772 12.8103C13.3885 11.9043 14.2451 11.1797 15.25 10.7143Z" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M14 21V22C14 22.7956 14.3161 23.5587 14.8787 24.1213C15.4413 24.6839 16.2044 25 17 25C17.7956 25 18.5587 24.6839 19.1213 24.1213C19.6839 23.5587 20 22.7956 20 22V21" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="reminder-dot" id="reminderDot"></span>
+            <svg class="reminder-filled" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="1" width="32" height="32" rx="16" fill="white"/>
+              <rect x="1" y="1" width="32" height="32" rx="16" stroke="#C9C9C9" stroke-width="2"/>
+              <path d="M15.25 10.7143C15.25 10.2596 15.4344 9.82359 15.7626 9.5021C16.0908 9.18061 16.5359 9 17 9C17.4641 9 17.9092 9.18061 18.2374 9.5021C18.5656 9.82359 18.75 10.2596 18.75 10.7143C19.7549 11.1797 20.6115 11.9043 21.228 12.8103C21.8446 13.7162 22.1979 14.7695 22.25 15.8571V18.4286C22.3158 18.9615 22.5085 19.4718 22.8125 19.9184C23.1164 20.365 23.5232 20.7355 24 21H10C10.4768 20.7355 10.8836 20.365 11.1875 19.9184C11.4915 19.4718 11.6842 18.9615 11.75 18.4286V15.8571C11.8021 14.7695 12.1554 13.7162 12.772 12.8103C13.3885 11.9043 14.2451 11.1797 15.25 10.7143Z" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 21V22C14 22.7956 14.3161 23.5587 14.8787 24.1213C15.4413 24.6839 16.2044 25 17 25C17.7956 25 18.5587 24.6839 19.1213 24.1213C19.6839 23.5587 20 22.7956 20 22V21" stroke="#09090B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
           <div class="reminder-menu" id="reminderMenu">
             <div class="reminder-img-wrap" id="reminderImgWrap">
