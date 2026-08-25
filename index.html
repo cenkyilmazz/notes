@@ -429,8 +429,15 @@
     border-radius: 12px;
     box-sizing: border-box;
     overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
   }
   .search-panel.has-query .search-results { display: flex; }
+  .search-results.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
   .search-result-item {
     display: flex;
     align-items: center;
@@ -1823,14 +1830,30 @@
     return words.some((w) => w.startsWith(q));
   }
 
+  function hideSearchResults() {
+    if (!searchPanel.classList.contains("has-query")) return;
+    searchResults.classList.remove("show");
+    setTimeout(() => {
+      searchPanel.classList.remove("has-query");
+      searchResults.innerHTML = "";
+    }, 180);
+  }
+
+  function showSearchResults() {
+    searchPanel.classList.add("has-query");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        searchResults.classList.add("show");
+      });
+    });
+  }
+
   function runSearch(query) {
     const q = query.trim().toLowerCase();
-    searchResults.innerHTML = "";
     if (!q) {
-      searchPanel.classList.remove("has-query");
+      hideSearchResults();
       return;
     }
-    searchPanel.classList.add("has-query");
 
     const matches = [];
     Object.keys(notesData).forEach((dk) => {
@@ -1842,11 +1865,14 @@
     });
     matches.sort((a, b) => dkToDate(a.dk) - dkToDate(b.dk));
 
+    searchResults.innerHTML = "";
+
     if (matches.length === 0) {
       const empty = document.createElement("div");
       empty.className = "search-empty";
       empty.textContent = "Sonuç bulunamadı.";
       searchResults.appendChild(empty);
+      showSearchResults();
       return;
     }
 
@@ -1868,6 +1894,7 @@
       });
       searchResults.appendChild(row);
     });
+    showSearchResults();
   }
 
   function openSearch() {
@@ -1886,6 +1913,7 @@
       searchOverlay.classList.remove("visible");
       searchInput.value = "";
       searchResults.innerHTML = "";
+      searchResults.classList.remove("show");
       searchPanel.classList.remove("has-query");
       updateSearchClearBtn();
     }, 200);
