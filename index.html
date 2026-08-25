@@ -541,11 +541,16 @@
     height: 154px;
     z-index: 1;
   }
-  .reminder-img-row1,
-  .reminder-img-row2,
-  .reminder-img-row3 {
+  .reminder-hover-overlay {
+    position: absolute;
+    left: 0;
+    width: 100px;
+    height: 40px;
+    opacity: 0;
+    pointer-events: none;
     z-index: 2;
   }
+  .reminder-hover-overlay.show { opacity: 1; }
   .reminder-row {
     position: absolute;
     left: 0;
@@ -892,9 +897,7 @@
             <div class="reminder-img-wrap" id="reminderImgWrap">
               <img class="reminder-img reminder-img-base active" src="assets/reminder-default.svg" alt="" width="100" height="116">
               <img class="reminder-img reminder-img-with-clear" src="assets/reminder-with-clear.svg" alt="" width="100" height="154">
-              <img class="reminder-img reminder-img-row1" src="assets/reminder-row1.svg" alt="" width="100" height="116">
-              <img class="reminder-img reminder-img-row2" src="assets/reminder-row2.svg" alt="" width="100" height="116">
-              <img class="reminder-img reminder-img-row3" src="assets/reminder-row3.svg" alt="" width="100" height="116">
+              <img class="reminder-hover-overlay" id="reminderHoverOverlay" src="assets/reminder-hover-row1.svg" alt="" width="100" height="40">
               <button type="button" class="reminder-row" id="reminderRow1" style="top:0px;height:39px" aria-label="1 saat sonra"></button>
               <button type="button" class="reminder-row" id="reminderRow2" style="top:39px;height:38px" aria-label="3 saat sonra"></button>
               <button type="button" class="reminder-row" id="reminderRow3" style="top:77px;height:39px" aria-label="Yarın 09:00"></button>
@@ -1596,10 +1599,8 @@
   const reminderRow3 = document.getElementById("reminderRow3");
   const reminderImgBase = reminderMenu.querySelector(".reminder-img-base");
   const reminderImgWithClear = reminderMenu.querySelector(".reminder-img-with-clear");
-  const reminderImgRow1 = reminderMenu.querySelector(".reminder-img-row1");
-  const reminderImgRow2 = reminderMenu.querySelector(".reminder-img-row2");
-  const reminderImgRow3 = reminderMenu.querySelector(".reminder-img-row3");
-  const reminderImgs = [reminderImgBase, reminderImgWithClear, reminderImgRow1, reminderImgRow2, reminderImgRow3];
+  const reminderHoverOverlay = document.getElementById("reminderHoverOverlay");
+  const reminderImgs = [reminderImgBase, reminderImgWithClear];
 
   function setActiveReminderImg(img) {
     reminderImgs.forEach((el) => el.classList.toggle("active", el === img));
@@ -1609,19 +1610,32 @@
     return reminderImgWrap.classList.contains("has-reminder") ? reminderImgWithClear : reminderImgBase;
   }
 
+  function showRowHover(src, top) {
+    reminderHoverOverlay.src = src;
+    reminderHoverOverlay.style.top = top + "px";
+    reminderHoverOverlay.classList.add("show");
+  }
+
+  function hideRowHover() {
+    reminderHoverOverlay.classList.remove("show");
+  }
+
   reminderBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     if (!modalTarget) return;
     reminderMenu.classList.toggle("open");
     setActiveReminderImg(currentReminderBaseImg());
+    hideRowHover();
   });
 
-  reminderRow1.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow1));
-  reminderRow1.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
-  reminderRow2.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow2));
-  reminderRow2.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
-  reminderRow3.addEventListener("mouseenter", () => setActiveReminderImg(reminderImgRow3));
-  reminderRow3.addEventListener("mouseleave", () => setActiveReminderImg(currentReminderBaseImg()));
+  reminderRow1.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row1.svg", 0));
+  reminderRow1.addEventListener("mouseleave", hideRowHover);
+  reminderRow2.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row2.svg", 39));
+  reminderRow2.addEventListener("mouseleave", hideRowHover);
+  reminderRow3.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row3.svg", 77));
+  reminderRow3.addEventListener("mouseleave", hideRowHover);
+  reminderClearBtn.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-clear.svg", 115));
+  reminderClearBtn.addEventListener("mouseleave", hideRowHover);
 
   reminderRow1.addEventListener("click", () => setReminder(Date.now() + 60 * 60000));
   reminderRow2.addEventListener("click", () => setReminder(Date.now() + 180 * 60000));
