@@ -111,6 +111,7 @@
     .grid { grid-template-columns: 1fr; }
   }
   .day-col {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -120,8 +121,16 @@
   }
   .day-col:last-child { border-right: none; }
   .day-col-today {
-    border-top-color: #FD6119;
-    margin-top: -2px;
+    border-top-color: transparent;
+  }
+  .day-col-today::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #FD6119;
   }
   .day-head {
     display: flex;
