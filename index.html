@@ -116,8 +116,12 @@
     min-width: 0;
     padding: 24px 24px 24px 24px;
     border-right: 2px solid #000000;
+    border-top: 4px solid transparent;
   }
   .day-col:last-child { border-right: none; }
+  .day-col-today {
+    border-top-color: #FD6119;
+  }
   .day-head {
     display: flex;
     align-items: baseline;
@@ -125,9 +129,6 @@
     padding-bottom: 8px;
     margin-bottom: 16px;
     border-bottom: 2px solid #000000;
-  }
-  .day-head-today {
-    border-bottom-color: #FD6119;
   }
   .day-date {
     font-family: "Inter", sans-serif;
@@ -1736,12 +1737,12 @@
       const dk = dks[i];
 
       const col = document.createElement("div");
-      col.className = "day-col day-col-enter";
+      col.className = dk === todayKey ? "day-col day-col-enter day-col-today" : "day-col day-col-enter";
       col.style.animationDelay = `${i * 60}ms`;
       col.dataset.dk = dk;
 
       const head = document.createElement("div");
-      head.className = dk === todayKey ? "day-head day-head-today" : "day-head";
+      head.className = "day-head";
       head.innerHTML = `
         <span class="day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
         <span class="day-name">${DAY_NAMES[i]}</span>
