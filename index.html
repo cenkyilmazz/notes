@@ -1627,13 +1627,13 @@
 
   reminderRow1.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row1.svg", 0));
   reminderRow1.addEventListener("mouseleave", hideRowHover);
-  reminderRow2.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row2.svg", 36));
+  reminderRow2.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-row2.svg", 37));
   reminderRow2.addEventListener("mouseleave", hideRowHover);
   reminderRow3.addEventListener("mouseenter", () => {
     const src = reminderImgWrap.classList.contains("has-reminder")
       ? "assets/reminder-hover-row3-clear.svg"
       : "assets/reminder-hover-row3.svg";
-    showRowHover(src, 74);
+    showRowHover(src, 75);
   });
   reminderRow3.addEventListener("mouseleave", hideRowHover);
   reminderClearBtn.addEventListener("mouseenter", () => showRowHover("assets/reminder-hover-clear.svg", 113));
