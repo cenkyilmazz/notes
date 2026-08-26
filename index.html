@@ -2134,6 +2134,7 @@
 
   // ---- Daily notification reminders (09:00 / 12:00 / 15:00 / 18:00) ----
   const DAILY_CHECK_TIMES = [[9, 0], [12, 0], [15, 0], [18, 0]];
+  const DAILY_CHECK_STORAGE_KEY = "daily-check-last-slot-v1";
 
   function getIncompleteNotesForToday() {
     const dk = effectiveTodayKey();
@@ -2154,6 +2155,42 @@
     }
   }
 
+  function slotKeyFor(date, h, m) {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${pad(h)}:${pad(m)}`;
+  }
+
+  function getLastPastSlotToday(now) {
+    let last = null;
+    for (const [h, m] of DAILY_CHECK_TIMES) {
+      const candidate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+      if (candidate <= now) {
+        last = [h, m];
+      }
+    }
+    return last;
+  }
+
+  // Runs on load and whenever the tab becomes visible again. If the browser
+  // discarded/suspended this tab (memory saver, sleep, etc.) and a check
+  // time was silently missed, this catches up as soon as the page is alive
+  // again, instead of only waiting for the next scheduled slot.
+  function catchUpMissedDailyCheck() {
+    const now = new Date();
+    const lastSlot = getLastPastSlotToday(now);
+    if (!lastSlot) return;
+    const key = slotKeyFor(now, lastSlot[0], lastSlot[1]);
+    let stored = null;
+    try {
+      stored = localStorage.getItem(DAILY_CHECK_STORAGE_KEY);
+    } catch (e) {}
+    if (stored !== key) {
+      performDailyCheck();
+      try {
+        localStorage.setItem(DAILY_CHECK_STORAGE_KEY, key);
+      } catch (e) {}
+    }
+  }
+
   function scheduleNextDailyCheck() {
     const now = new Date();
     let target = null;
@@ -2169,13 +2206,19 @@
     }
     const delay = target - now;
     setTimeout(() => {
-      performDailyCheck();
+      catchUpMissedDailyCheck();
       scheduleNextDailyCheck();
     }, delay);
   }
 
   if (typeof Notification !== "undefined") {
+    catchUpMissedDailyCheck();
     scheduleNextDailyCheck();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        catchUpMissedDailyCheck();
+      }
+    });
     if (Notification.permission === "default") {
       const requestOnFirstClick = () => {
         document.removeEventListener("click", requestOnFirstClick);
