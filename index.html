@@ -494,6 +494,8 @@
     border-radius: 8px;
     box-sizing: border-box;
     padding: 16px;
+    display: flex;
+    flex-direction: column;
   }
   .stat-cell:nth-child(2),
   .stat-cell:nth-child(3) {
@@ -510,6 +512,7 @@
   }
   .stat-label {
     display: block;
+    flex-shrink: 0;
     font-family: "Inter", sans-serif;
     font-weight: 700;
     font-size: 16px;
@@ -521,8 +524,8 @@
     box-sizing: border-box;
   }
   .stat-box {
+    flex: 1 1 auto;
     margin-top: 16px;
-    height: 91px;
     border: 2px solid #D2D2D2;
     box-sizing: border-box;
     display: flex;
