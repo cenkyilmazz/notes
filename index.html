@@ -1689,7 +1689,8 @@
     if (cell) startInlineEdit(cell, todayKey, 0);
   }
 
-  function render() {
+  function render(options) {
+    const animate = !options || options.animate !== false;
     const dates = getWorkweek(weekOffset);
     document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / Weekly To-Do List</span>`;
 
@@ -1703,8 +1704,8 @@
       const dk = dks[i];
 
       const col = document.createElement("div");
-      col.className = "day-col day-col-enter";
-      col.style.animationDelay = `${i * 60}ms`;
+      col.className = animate ? "day-col day-col-enter" : "day-col";
+      if (animate) col.style.animationDelay = `${i * 60}ms`;
       col.dataset.dk = dk;
 
       const head = document.createElement("div");
@@ -1719,7 +1720,7 @@
       notesCol.className = "notes-col";
       notesData[dk].forEach((_, index) => {
         const delay = i * 60 + Math.min(index * 25, 300);
-        notesCol.appendChild(buildCell(dk, index, delay));
+        notesCol.appendChild(buildCell(dk, index, animate ? delay : 0, animate));
       });
       col.appendChild(notesCol);
 
@@ -1727,10 +1728,10 @@
     });
   }
 
-  function buildCell(dk, index, delayMs) {
+  function buildCell(dk, index, delayMs, animate) {
     const wrapper = document.createElement("div");
-    wrapper.className = "note-cell note-cell-enter";
-    wrapper.style.animationDelay = `${delayMs || 0}ms`;
+    wrapper.className = animate === false ? "note-cell" : "note-cell note-cell-enter";
+    if (animate !== false) wrapper.style.animationDelay = `${delayMs || 0}ms`;
     wrapper.draggable = true;
 
     wrapper.appendChild(buildTextButton(wrapper, dk, index));
@@ -1796,7 +1797,7 @@
       dragSource = null;
       if (src.dk === dk && src.index === index) return;
       moveNote(src.dk, src.index, dk, index);
-      render();
+      render({ animate: false });
       saveToStorage();
     });
 
