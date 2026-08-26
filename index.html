@@ -296,22 +296,6 @@
     transform: translateY(14px);
     animation: fadeSlideUp 0.5s ease both;
   }
-  .teaser-logo-stage {
-    position: relative;
-    width: 279px;
-    height: 88px;
-    margin-top: -10px;
-  }
-  .teaser-logo-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-    mix-blend-mode: screen;
-    pointer-events: none;
-  }
 
   @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(14px); }
@@ -979,9 +963,13 @@
 
 <div class="teaser-overlay" id="teaserOverlay">
   <div class="teaser-logo-wrap">
-    <div class="teaser-logo-stage teaser-logo">
-      <video class="teaser-logo-video" id="teaserLogoVideo" src="assets/logo-plus.webm" autoplay muted playsinline></video>
-    </div>
+    <svg class="teaser-logo" width="279" height="88" viewBox="0 0 279 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M65.7798 19.7776H42.0685V77.5808H23.7113V19.7776H0V3.27807H65.7798V19.7776Z" fill="black"/>
+      <path d="M80.8606 23.3835C97.5787 23.3835 109.489 35.0753 109.489 51.0285C109.489 67.2003 97.5787 79.2198 80.8606 79.2198C64.0332 79.2198 52.0136 67.2003 52.0136 51.0285C52.0136 35.0753 64.0332 23.3835 80.8606 23.3835ZM80.8606 63.9222C87.963 63.9222 92.7709 58.2402 92.7709 51.1378C92.7709 44.2538 87.963 38.6811 80.8606 38.6811C73.5396 38.6811 68.841 44.2538 68.841 51.1378C68.841 58.2402 73.5396 63.9222 80.8606 63.9222Z" fill="black"/>
+      <path d="M170.662 10V87.5808L152.961 77.5808V74.8491C149.027 77.3623 144.329 78.892 138.428 78.892C124.114 78.892 112.094 66.9817 112.094 51.1378C112.094 35.4031 124.114 23.6021 138.428 23.6021C144.329 23.6021 149.027 25.1318 152.961 27.645V0L170.662 10ZM142.034 64.3593C145.858 64.3593 149.574 63.2666 152.961 59.4422V42.9426C149.574 39.2275 145.858 38.0255 142.034 38.0255C134.822 38.0255 129.468 43.926 129.468 51.1378C129.468 58.5681 134.822 64.3593 142.034 64.3593Z" fill="black"/>
+      <path d="M202.437 23.3835C219.155 23.3835 231.065 35.0753 231.065 51.0285C231.065 67.2003 219.155 79.2198 202.437 79.2198C185.609 79.2198 173.59 67.2003 173.59 51.0285C173.59 35.0753 185.609 23.3835 202.437 23.3835ZM202.437 63.9222C209.539 63.9222 214.347 58.2402 214.347 51.1378C214.347 44.2538 209.539 38.6811 202.437 38.6811C195.116 38.6811 190.417 44.2538 190.417 51.1378C190.417 58.2402 195.116 63.9222 202.437 63.9222Z" fill="black"/>
+      <path d="M258.403 59.2193V79H242.477V59.2193H222V43.7807H242.477V24H258.403V43.7807H279V59.2193H258.403Z" fill="#FD6119"/>
+    </svg>
   </div>
 </div>
 
@@ -2352,19 +2340,6 @@
   // ---- Teaser splash ----
   const teaserOverlay = document.getElementById("teaserOverlay");
   const appRoot = document.getElementById("appRoot");
-  const teaserLogoVideo = document.getElementById("teaserLogoVideo");
-
-  const hideVideoOnFailure = () => {
-    teaserLogoVideo.style.display = "none";
-  };
-
-  if (teaserLogoVideo) {
-    teaserLogoVideo.addEventListener("error", hideVideoOnFailure);
-    const playPromise = teaserLogoVideo.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {});
-    }
-  }
 
   setTimeout(() => {
     teaserOverlay.classList.add("teaser-closing");
