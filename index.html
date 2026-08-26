@@ -535,8 +535,9 @@
   }
   .stat-value {
     font-family: "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 32px;
+    font-weight: 500;
+    font-size: 38px;
+    letter-spacing: -0.6px;
     color: #000000;
   }
   .search-overlay {
@@ -2177,7 +2178,104 @@
 
   const dashboardOverlay = document.getElementById("dashboardOverlay");
 
+  function hasNoteText(item) {
+    return !!(item.text && item.text.trim());
+  }
+
+  function isWeekendDate(date) {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  }
+
+  function computeStats() {
+    let total = 0;
+    let completed = 0;
+    const dayOfWeekCounts = [0, 0, 0, 0, 0]; // Mon..Fri, aligned with DAY_NAMES
+
+    Object.keys(notesData).forEach((dk) => {
+      const items = notesData[dk];
+      const [y, m, d] = dk.split("-").map(Number);
+      const date = new Date(y, m - 1, d);
+      const dow = date.getDay(); // 0=Sun..6=Sat
+      const dayIdx = dow - 1; // 0=Mon..4=Fri, negative for Sat/Sun
+      items.forEach((item) => {
+        if (hasNoteText(item)) {
+          total++;
+          if (item.completed) completed++;
+          if (dayIdx >= 0 && dayIdx <= 4) dayOfWeekCounts[dayIdx]++;
+        }
+      });
+    });
+
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    // This week (real current week, offset 0)
+    const thisWeekDates = getWorkweek(0);
+    let thisWeekCount = 0;
+    thisWeekDates.forEach((date) => {
+      const dk = keyOf(date);
+      const items = notesData[dk] || [];
+      thisWeekCount += items.filter(hasNoteText).length;
+    });
+
+    // Current streak (consecutive workdays with at least one note, walking back from today)
+    let cursor = new Date();
+    const todayKey = keyOf(cursor);
+    const todayHasNotes = notesData[todayKey] && notesData[todayKey].some(hasNoteText);
+    if (!todayHasNotes) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    let streak = 0;
+    let guard = 0;
+    while (guard < 3650) {
+      guard++;
+      if (isWeekendDate(cursor)) {
+        cursor.setDate(cursor.getDate() - 1);
+        continue;
+      }
+      const k = keyOf(cursor);
+      const items = notesData[k];
+      if (items && items.some(hasNoteText)) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // Most active day of week
+    let mostActiveIdx = -1;
+    let mostActiveCount = -1;
+    dayOfWeekCounts.forEach((count, idx) => {
+      if (count > mostActiveCount) {
+        mostActiveCount = count;
+        mostActiveIdx = idx;
+      }
+    });
+    const mostActiveDay = mostActiveCount > 0 ? DAY_NAMES[mostActiveIdx] : "-";
+
+    return {
+      total,
+      completed,
+      completionRate,
+      thisWeekCount,
+      streak,
+      mostActiveDay,
+    };
+  }
+
+  function renderDashboardStats() {
+    const stats = computeStats();
+    document.getElementById("statTotalNotes").textContent = stats.total;
+    document.getElementById("statCompleted").textContent = stats.completed;
+    document.getElementById("statCompletionRate").textContent = stats.completionRate + "%";
+    document.getElementById("statThisWeek").textContent = stats.thisWeekCount;
+    document.getElementById("statStreak").textContent = stats.streak;
+    document.getElementById("statActiveDay").textContent = stats.mostActiveDay;
+  }
+
   function openDashboard() {
+    renderDashboardStats();
     dashboardOverlay.classList.add("visible");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
