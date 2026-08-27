@@ -1467,10 +1467,30 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         Object.keys(parsed).forEach((dk) => { notesData[dk] = parsed[dk]; });
+        pruneTrailingEmptyCells();
       }
     } catch (e) {
       console.error("Storage load failed", e);
     }
+  }
+
+  // If the user added extra empty note boxes (e.g. by clicking past the
+  // last one) but never typed anything in them, trim those trailing empty
+  // boxes back down to the default of 12 per day on load/refresh.
+  function pruneTrailingEmptyCells() {
+    let changed = false;
+    Object.keys(notesData).forEach((dk) => {
+      const arr = notesData[dk];
+      if (!Array.isArray(arr)) return;
+      while (arr.length > 12) {
+        const last = arr[arr.length - 1];
+        const isEmpty = !last.text || !last.text.trim();
+        if (!isEmpty) break;
+        arr.pop();
+        changed = true;
+      }
+    });
+    if (changed) saveToStorage();
   }
 
   // ---- User name (personalization) ----
