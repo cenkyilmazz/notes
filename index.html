@@ -368,14 +368,16 @@
   .name-overlay.visible { display: flex; }
   .name-overlay.open { opacity: 1; }
   .name-card {
-    width: 360px;
+    width: 340px;
+    height: 302px;
     max-width: calc(100% - 48px);
     background: #FFFFFF;
     border: 2px solid #000000;
     border-radius: 12px;
-    padding: 24px;
     box-sizing: border-box;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -384,44 +386,45 @@
     opacity: 1;
     transform: translateY(0);
   }
-  .name-placeholder-note {
-    font-family: "Inter", sans-serif;
-    font-size: 11px;
-    color: #C4C4C4;
-    margin-bottom: 12px;
-  }
-  .name-title {
-    font-family: "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: -0.4px;
-    color: #000000;
-    margin: 0 0 16px 0;
+  .name-logo {
+    width: 130px;
+    height: 40px;
+    margin-top: 44px;
   }
   .name-input {
-    width: 100%;
+    width: 284px;
+    height: 42px;
     box-sizing: border-box;
-    border: 2px solid #EFEFEF;
     border-radius: 8px;
-    padding: 10px 12px;
-    font-family: "Inter", sans-serif;
+    border: 2px solid var(--box-border);
+    background: #FFFFFF;
+    padding: 0 14px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
     font-size: 15px;
     letter-spacing: -0.3px;
     outline: none;
-    margin-bottom: 12px;
+    margin-top: 28px;
   }
-  .name-input:focus { border-color: #000000; }
+  .name-input + .name-input {
+    margin-top: 12px;
+  }
+  .name-input:hover,
+  .name-input:focus {
+    border-color: #000000;
+  }
   .name-save-btn {
-    width: 100%;
+    width: 284px;
+    height: 38px;
     background: #000000;
     color: #FFFFFF;
     border: none;
     border-radius: 8px;
-    padding: 10px 12px;
     font-family: "Inter", sans-serif;
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
+    margin-top: 28px;
+    margin-bottom: 28px;
   }
   .dashboard-overlay {
     display: none;
@@ -1065,10 +1068,16 @@
 
 <div class="name-overlay" id="nameOverlay">
   <div class="name-card">
-    <div class="name-placeholder-note">Geçici tasarım — asıl tasarım gelince değişecek</div>
-    <h2 class="name-title">Adını girer misin?</h2>
-    <input type="text" class="name-input" id="nameInput" placeholder="İsmin" autocomplete="off" maxlength="30">
-    <button type="button" class="name-save-btn" id="nameSaveBtn">Kaydet</button>
+    <svg class="name-logo" width="130" height="40" viewBox="0 0 279 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M65.7798 19.7776H42.0685V77.5808H23.7113V19.7776H0V3.27807H65.7798V19.7776Z" fill="black"/>
+      <path d="M80.8606 23.3835C97.5787 23.3835 109.489 35.0753 109.489 51.0285C109.489 67.2003 97.5787 79.2198 80.8606 79.2198C64.0332 79.2198 52.0136 67.2003 52.0136 51.0285C52.0136 35.0753 64.0332 23.3835 80.8606 23.3835ZM80.8606 63.9222C87.963 63.9222 92.7709 58.2402 92.7709 51.1378C92.7709 44.2538 87.963 38.6811 80.8606 38.6811C73.5396 38.6811 68.841 44.2538 68.841 51.1378C68.841 58.2402 73.5396 63.9222 80.8606 63.9222Z" fill="black"/>
+      <path d="M170.662 10V87.5808L152.961 77.5808V74.8491C149.027 77.3623 144.329 78.892 138.428 78.892C124.114 78.892 112.094 66.9817 112.094 51.1378C112.094 35.4031 124.114 23.6021 138.428 23.6021C144.329 23.6021 149.027 25.1318 152.961 27.645V0L170.662 10ZM142.034 64.3593C145.858 64.3593 149.574 63.2666 152.961 59.4422V42.9426C149.574 39.2275 145.858 38.0255 142.034 38.0255C134.822 38.0255 129.468 43.926 129.468 51.1378C129.468 58.5681 134.822 64.3593 142.034 64.3593Z" fill="black"/>
+      <path d="M202.437 23.3835C219.155 23.3835 231.065 35.0753 231.065 51.0285C231.065 67.2003 219.155 79.2198 202.437 79.2198C185.609 79.2198 173.59 67.2003 173.59 51.0285C173.59 35.0753 185.609 23.3835 202.437 23.3835ZM202.437 63.9222C209.539 63.9222 214.347 58.2402 214.347 51.1378C214.347 44.2538 209.539 38.6811 202.437 38.6811C195.116 38.6811 190.417 44.2538 190.417 51.1378C190.417 58.2402 195.116 63.9222 202.437 63.9222Z" fill="black"/>
+      <path d="M258.403 59.2193V79H242.477V59.2193H222V43.7807H242.477V24H258.403V43.7807H279V59.2193H258.403Z" fill="#FD6119"/>
+    </svg>
+    <input type="text" class="name-input" id="nameInput" placeholder="Name" autocomplete="off" maxlength="30">
+    <input type="text" class="name-input" id="surnameInput" placeholder="Surname" autocomplete="off" maxlength="30">
+    <button type="button" class="name-save-btn" id="nameSaveBtn">Save</button>
   </div>
 </div>
 
@@ -1443,31 +1452,41 @@
   }
 
   // ---- User name (personalization) ----
-  const USER_NAME_KEY = "hafta-notlari-username";
+  const USER_FIRSTNAME_KEY = "hafta-notlari-firstname";
+  const USER_LASTNAME_KEY = "hafta-notlari-lastname";
 
-  function getUserName() {
+  function getUserFirstName() {
     try {
-      return (localStorage.getItem(USER_NAME_KEY) || "").trim();
+      return (localStorage.getItem(USER_FIRSTNAME_KEY) || "").trim();
     } catch (e) {
       return "";
     }
   }
 
-  function setUserName(name) {
+  function getUserLastName() {
     try {
-      localStorage.setItem(USER_NAME_KEY, name.trim());
+      return (localStorage.getItem(USER_LASTNAME_KEY) || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setUserName(firstName, lastName) {
+    try {
+      localStorage.setItem(USER_FIRSTNAME_KEY, firstName.trim());
+      localStorage.setItem(USER_LASTNAME_KEY, lastName.trim());
     } catch (e) {}
   }
 
   function updateProfileAvatar() {
-    const name = getUserName();
+    const firstName = getUserFirstName();
     const initialEl = document.getElementById("profileAvatarInitial");
-    initialEl.textContent = name ? name.trim().charAt(0).toUpperCase() : "?";
+    initialEl.textContent = firstName ? firstName.charAt(0).toUpperCase() : "?";
   }
 
   function subtitleText() {
-    const name = getUserName();
-    return name ? `${name}'s To-Do List` : "To-Do List";
+    const firstName = getUserFirstName();
+    return firstName ? `${firstName}'s To-Do List` : "To-Do List";
   }
   let dragSource = null; // { dk, index }
 
@@ -2254,14 +2273,16 @@
   render();
   updateProfileAvatar();
 
-  // ---- User name popup (placeholder design) ----
+  // ---- User name popup ----
   const nameOverlay = document.getElementById("nameOverlay");
   const nameInput = document.getElementById("nameInput");
+  const surnameInput = document.getElementById("surnameInput");
   const nameSaveBtn = document.getElementById("nameSaveBtn");
   const profileAvatarBtn = document.getElementById("profileAvatarBtn");
 
   function openNamePopup() {
-    nameInput.value = getUserName();
+    nameInput.value = getUserFirstName();
+    surnameInput.value = getUserLastName();
     nameOverlay.classList.add("visible");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -2279,17 +2300,20 @@
   }
 
   function saveNameFromPopup() {
-    const value = nameInput.value.trim();
-    if (!value) return;
-    setUserName(value);
+    const first = nameInput.value.trim();
+    const last = surnameInput.value.trim();
+    if (!first) return;
+    setUserName(first, last);
     updateProfileAvatar();
     render();
     closeNamePopup();
   }
 
   nameSaveBtn.addEventListener("click", saveNameFromPopup);
-  nameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") saveNameFromPopup();
+  [nameInput, surnameInput].forEach((el) => {
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") saveNameFromPopup();
+    });
   });
   profileAvatarBtn.addEventListener("click", openNamePopup);
 
@@ -2302,7 +2326,7 @@
     setTimeout(() => {
       teaserOverlay.classList.add("teaser-hidden");
       appRoot.classList.add("visible");
-      if (!getUserName()) {
+      if (!getUserFirstName()) {
         openNamePopup();
       }
     }, 400);
