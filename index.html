@@ -2280,6 +2280,19 @@
     }
   });
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "f" && e.key !== "F") return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = document.activeElement && document.activeElement.tagName;
+    const isEditable = tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable);
+    if (isEditable) return;
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  });
+
   searchInput.addEventListener("input", () => {
     updateSearchClearBtn();
     runSearch(searchInput.value);
