@@ -331,6 +331,98 @@
   }
   .modal-overlay.visible { display: flex; }
   .modal-overlay.open { opacity: 1; }
+  .profile-avatar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 50%;
+    box-sizing: border-box;
+    transition: background 0.15s ease;
+  }
+  .profile-avatar-btn:hover {
+    background: #000000;
+  }
+  .profile-avatar-btn:hover span {
+    color: #FFFFFF;
+  }
+  .profile-avatar-btn span {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.4px;
+    color: #000000;
+  }
+  .name-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .name-overlay.visible { display: flex; }
+  .name-overlay.open { opacity: 1; }
+  .name-card {
+    width: 360px;
+    max-width: calc(100% - 48px);
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 12px;
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .name-overlay.open .name-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .name-placeholder-note {
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    color: #C4C4C4;
+    margin-bottom: 12px;
+  }
+  .name-title {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.4px;
+    color: #000000;
+    margin: 0 0 16px 0;
+  }
+  .name-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #EFEFEF;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .name-input:focus { border-color: #000000; }
+  .name-save-btn {
+    width: 100%;
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
   .dashboard-overlay {
     display: none;
     position: fixed;
@@ -901,6 +993,9 @@
       <path d="M16.5225 16.8182V27H14.6631L10.2334 20.5916H10.1588V27H8.00612V16.8182H9.89532L14.2902 23.2216H14.3797V16.8182H16.5225ZM21.2915 27.1491C20.5193 27.1491 19.8514 26.9851 19.288 26.657C18.7279 26.3255 18.2953 25.8648 17.9904 25.2749C17.6855 24.6816 17.533 23.9938 17.533 23.2116C17.533 22.4228 17.6855 21.7334 17.9904 21.1435C18.2953 20.5502 18.7279 20.0895 19.288 19.7614C19.8514 19.4299 20.5193 19.2642 21.2915 19.2642C22.0638 19.2642 22.73 19.4299 23.2901 19.7614C23.8536 20.0895 24.2878 20.5502 24.5927 21.1435C24.8976 21.7334 25.0501 22.4228 25.0501 23.2116C25.0501 23.9938 24.8976 24.6816 24.5927 25.2749C24.2878 25.8648 23.8536 26.3255 23.2901 26.657C22.73 26.9851 22.0638 27.1491 21.2915 27.1491ZM21.3015 25.5085C21.6528 25.5085 21.9461 25.4091 22.1815 25.2102C22.4168 25.008 22.5941 24.733 22.7134 24.3849C22.8361 24.0369 22.8974 23.6409 22.8974 23.1967C22.8974 22.7526 22.8361 22.3565 22.7134 22.0085C22.5941 21.6605 22.4168 21.3854 22.1815 21.1832C21.9461 20.9811 21.6528 20.88 21.3015 20.88C20.9469 20.88 20.6486 20.9811 20.4066 21.1832C20.168 21.3854 19.9873 21.6605 19.8647 22.0085C19.7454 22.3565 19.6857 22.7526 19.6857 23.1967C19.6857 23.6409 19.7454 24.0369 19.8647 24.3849C19.9873 24.733 20.168 25.008 20.4066 25.2102C20.6486 25.4091 20.9469 25.5085 21.3015 25.5085ZM27.3222 27L25.2441 19.3636H27.3868L28.5701 24.4943H28.6397L29.8726 19.3636H31.9756L33.2284 24.4645H33.2931L34.4564 19.3636H36.5942L34.5211 27H32.2789L30.9664 22.1974H30.8719L29.5594 27H27.3222Z" fill="white"/>
     </svg>
   </button>
+  <button class="now-btn profile-avatar-btn" id="profileAvatarBtn" aria-label="Profil">
+    <span id="profileAvatarInitial"></span>
+  </button>
   <div class="nav-buttons">
     <button class="now-btn" id="searchBtn" aria-label="Search">
       <svg class="default-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -967,6 +1062,15 @@
 
 </div>
 
+
+<div class="name-overlay" id="nameOverlay">
+  <div class="name-card">
+    <div class="name-placeholder-note">Geçici tasarım — asıl tasarım gelince değişecek</div>
+    <h2 class="name-title">Adını girer misin?</h2>
+    <input type="text" class="name-input" id="nameInput" placeholder="İsmin" autocomplete="off" maxlength="30">
+    <button type="button" class="name-save-btn" id="nameSaveBtn">Kaydet</button>
+  </div>
+</div>
 
 <div class="dashboard-overlay" id="dashboardOverlay">
   <div class="dashboard-card">
@@ -1337,6 +1441,34 @@
       console.error("Storage load failed", e);
     }
   }
+
+  // ---- User name (personalization) ----
+  const USER_NAME_KEY = "hafta-notlari-username";
+
+  function getUserName() {
+    try {
+      return (localStorage.getItem(USER_NAME_KEY) || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setUserName(name) {
+    try {
+      localStorage.setItem(USER_NAME_KEY, name.trim());
+    } catch (e) {}
+  }
+
+  function updateProfileAvatar() {
+    const name = getUserName();
+    const initialEl = document.getElementById("profileAvatarInitial");
+    initialEl.textContent = name ? name.trim().charAt(0).toUpperCase() : "?";
+  }
+
+  function subtitleText() {
+    const name = getUserName();
+    return name ? `${name}'s Weekly To-Do List` : "Weekly To-Do List";
+  }
   let dragSource = null; // { dk, index }
 
   function pad(n) { return String(n).padStart(2, "0"); }
@@ -1692,7 +1824,7 @@
   function render(options) {
     const animate = !options || options.animate !== false;
     const dates = getWorkweek(weekOffset);
-    document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / Weekly To-Do List</span>`;
+    document.getElementById("monthTitle").innerHTML = `${monthLabel(dates)}<span class="month-subtitle"> / ${subtitleText()}</span>`;
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
@@ -2120,6 +2252,46 @@
 
   loadFromStorage();
   render();
+  updateProfileAvatar();
+
+  // ---- User name popup (placeholder design) ----
+  const nameOverlay = document.getElementById("nameOverlay");
+  const nameInput = document.getElementById("nameInput");
+  const nameSaveBtn = document.getElementById("nameSaveBtn");
+  const profileAvatarBtn = document.getElementById("profileAvatarBtn");
+
+  function openNamePopup() {
+    nameInput.value = getUserName();
+    nameOverlay.classList.add("visible");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        nameOverlay.classList.add("open");
+        nameInput.focus();
+      });
+    });
+  }
+
+  function closeNamePopup() {
+    nameOverlay.classList.remove("open");
+    setTimeout(() => {
+      nameOverlay.classList.remove("visible");
+    }, 200);
+  }
+
+  function saveNameFromPopup() {
+    const value = nameInput.value.trim();
+    if (!value) return;
+    setUserName(value);
+    updateProfileAvatar();
+    render();
+    closeNamePopup();
+  }
+
+  nameSaveBtn.addEventListener("click", saveNameFromPopup);
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveNameFromPopup();
+  });
+  profileAvatarBtn.addEventListener("click", openNamePopup);
 
   // ---- Teaser splash ----
   const teaserOverlay = document.getElementById("teaserOverlay");
@@ -2130,6 +2302,9 @@
     setTimeout(() => {
       teaserOverlay.classList.add("teaser-hidden");
       appRoot.classList.add("visible");
+      if (!getUserName()) {
+        openNamePopup();
+      }
     }, 400);
   }, 1500);
 
