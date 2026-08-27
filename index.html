@@ -1500,8 +1500,15 @@
 
   function updateProfileAvatar() {
     const firstName = getUserFirstName();
+    const lastName = getUserLastName();
     const initialEl = document.getElementById("profileAvatarInitial");
-    initialEl.textContent = firstName ? firstName.charAt(0).toUpperCase() : "?";
+    if (!firstName) {
+      initialEl.textContent = "?";
+    } else {
+      const firstInitial = firstName.charAt(0).toUpperCase();
+      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "";
+      initialEl.textContent = firstInitial + lastInitial;
+    }
   }
 
   function subtitleText() {
