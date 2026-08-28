@@ -130,6 +130,9 @@
     margin-bottom: 16px;
     border-bottom: 2px solid #000000;
   }
+  .day-head-today {
+    border-bottom-color: #FD6119;
+  }
   .day-date {
     font-family: "Inter", sans-serif;
     font-weight: 700;
@@ -1884,6 +1887,7 @@
 
     const dks = dates.map(keyOf);
     dks.forEach(ensureDay);
+    const todayKey = effectiveTodayKey();
 
     const grid = document.getElementById("weekGrid");
     grid.innerHTML = "";
@@ -1897,7 +1901,7 @@
       col.dataset.dk = dk;
 
       const head = document.createElement("div");
-      head.className = "day-head";
+      head.className = dk === todayKey ? "day-head day-head-today" : "day-head";
       head.innerHTML = `
         <span class="day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
         <span class="day-name">${DAY_NAMES[i]}</span>
