@@ -1880,6 +1880,20 @@
     if (cell) startInlineEdit(cell, todayKey, 0);
   }
 
+  function openNewNoteForToday() {
+    const dk = effectiveTodayKey();
+    ensureDay(dk);
+    const arr = notesData[dk];
+    let index = arr.findIndex((item) => !item.text || !item.text.trim());
+    if (index === -1) {
+      index = arr.length;
+      arr.push({ text: "", completed: false });
+      saveToStorage();
+      render({ animate: false });
+    }
+    openModal(dk, index);
+  }
+
   function render(options) {
     const animate = !options || options.animate !== false;
     const dates = getWorkweek(weekOffset);
@@ -2303,6 +2317,20 @@
     } else {
       document.exitFullscreen().catch(() => {});
     }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "n" && e.key !== "N") return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = document.activeElement && document.activeElement.tagName;
+    const isEditable = tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable);
+    if (isEditable) return;
+    const anyOverlayOpen = [modalOverlay, dashboardOverlay, searchOverlay, nameOverlay].some(
+      (el) => el && el.classList.contains("visible")
+    );
+    if (anyOverlayOpen) return;
+    e.preventDefault();
+    openNewNoteForToday();
   });
 
   searchInput.addEventListener("input", () => {
